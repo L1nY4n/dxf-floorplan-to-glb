@@ -11,6 +11,7 @@ Default workflow is `serve` mode first: launch a local preview workbench, tune g
 - Door filtering mode (`none` or `block`)
 - Tunable wall/door/ground geometry
 - Interactive workbench UI with live material tuning
+- Geometry/material/action controls driven by `dat.GUI`
 - Viewer core controls: display, lighting, camera, animation, performance stats
 - Environment pipeline with neutral `RoomEnvironment` and remote EXR presets
 - API endpoints for rebuild/profile import/export
@@ -61,6 +62,16 @@ python3 scripts/dxf_to_glb.py build \
 - `--ground-margin-m`
 - `--center-mode grounded-xz|none|bbox-center`
 - `--unit-scale` (default `0.001`, mm to m)
+
+## Material Presets
+
+- `crystal-purple`
+- `frosted-purple`
+- `mirror-purple`
+- `warm-sand`
+- `ocean-cyan`
+- `emerald-glass`
+- `charcoal-tech`
 
 ## Workbench API
 

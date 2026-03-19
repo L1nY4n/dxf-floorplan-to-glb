@@ -45,7 +45,7 @@ python3 scripts/dxf_to_glb.py build \
 
 ## Geometry Controls
 
-Tune geometry with CLI flags or the web panel:
+Tune geometry with CLI flags or the `dat.GUI` workbench panel:
 
 - `--door-mode none|block` controls door extrusion (default `none`)
 - `--wall-height-m` wall extrusion height
@@ -62,7 +62,7 @@ Tune geometry with CLI flags or the web panel:
 Material profile defaults to `assets/material_profile_crystal_purple.json`.
 The workbench supports:
 
-- Preset switching (`crystal-purple`, `frosted-purple`, `mirror-purple`)
+- Preset switching (`crystal-purple`, `frosted-purple`, `mirror-purple`, `warm-sand`, `ocean-cyan`, `emerald-glass`, `charcoal-tech`)
 - Per-group editing for `wall`, `door`, `ground`
 - Real-time preview updates for color/opacity/roughness/metallic/emissive/specular/transmission/ior
 - Profile export/import as JSON

@@ -166,6 +166,166 @@ DEFAULT_STYLE_PRESETS: dict[str, dict[str, Any]] = {
             },
         }
     },
+    "warm-sand": {
+        "materials": {
+            "ground": {
+                "baseColor": "#f4ede2",
+                "opacity": 1.0,
+                "roughness": 0.92,
+                "metallic": 0.0,
+                "emissive": "#000000",
+                "specular": 0.25,
+                "transmission": 0.0,
+                "ior": 1.45,
+                "doubleSided": True,
+                "alphaMode": "OPAQUE",
+            },
+            "wall": {
+                "baseColor": "#d9c2a3",
+                "opacity": 0.52,
+                "roughness": 0.28,
+                "metallic": 0.03,
+                "emissive": "#26190e",
+                "specular": 0.45,
+                "transmission": 0.32,
+                "ior": 1.46,
+                "doubleSided": True,
+                "alphaMode": "BLEND",
+            },
+            "door": {
+                "baseColor": "#7d5a3a",
+                "opacity": 0.86,
+                "roughness": 0.32,
+                "metallic": 0.05,
+                "emissive": "#1f1308",
+                "specular": 0.4,
+                "transmission": 0.05,
+                "ior": 1.45,
+                "doubleSided": True,
+                "alphaMode": "BLEND",
+            },
+        }
+    },
+    "ocean-cyan": {
+        "materials": {
+            "ground": {
+                "baseColor": "#e9f4f7",
+                "opacity": 1.0,
+                "roughness": 0.9,
+                "metallic": 0.0,
+                "emissive": "#000000",
+                "specular": 0.3,
+                "transmission": 0.0,
+                "ior": 1.45,
+                "doubleSided": True,
+                "alphaMode": "OPAQUE",
+            },
+            "wall": {
+                "baseColor": "#45c1d2",
+                "opacity": 0.44,
+                "roughness": 0.07,
+                "metallic": 0.12,
+                "emissive": "#04202b",
+                "specular": 0.9,
+                "transmission": 0.72,
+                "ior": 1.49,
+                "doubleSided": True,
+                "alphaMode": "BLEND",
+            },
+            "door": {
+                "baseColor": "#127f8e",
+                "opacity": 0.82,
+                "roughness": 0.16,
+                "metallic": 0.18,
+                "emissive": "#031217",
+                "specular": 0.62,
+                "transmission": 0.14,
+                "ior": 1.47,
+                "doubleSided": True,
+                "alphaMode": "BLEND",
+            },
+        }
+    },
+    "emerald-glass": {
+        "materials": {
+            "ground": {
+                "baseColor": "#edf4ef",
+                "opacity": 1.0,
+                "roughness": 0.9,
+                "metallic": 0.0,
+                "emissive": "#000000",
+                "specular": 0.28,
+                "transmission": 0.0,
+                "ior": 1.45,
+                "doubleSided": True,
+                "alphaMode": "OPAQUE",
+            },
+            "wall": {
+                "baseColor": "#2ca878",
+                "opacity": 0.4,
+                "roughness": 0.06,
+                "metallic": 0.08,
+                "emissive": "#072418",
+                "specular": 0.88,
+                "transmission": 0.8,
+                "ior": 1.5,
+                "doubleSided": True,
+                "alphaMode": "BLEND",
+            },
+            "door": {
+                "baseColor": "#1b6d4c",
+                "opacity": 0.84,
+                "roughness": 0.2,
+                "metallic": 0.12,
+                "emissive": "#07140e",
+                "specular": 0.58,
+                "transmission": 0.18,
+                "ior": 1.48,
+                "doubleSided": True,
+                "alphaMode": "BLEND",
+            },
+        }
+    },
+    "charcoal-tech": {
+        "materials": {
+            "ground": {
+                "baseColor": "#d8dbe0",
+                "opacity": 1.0,
+                "roughness": 0.86,
+                "metallic": 0.04,
+                "emissive": "#000000",
+                "specular": 0.34,
+                "transmission": 0.0,
+                "ior": 1.45,
+                "doubleSided": True,
+                "alphaMode": "OPAQUE",
+            },
+            "wall": {
+                "baseColor": "#5b6471",
+                "opacity": 0.46,
+                "roughness": 0.12,
+                "metallic": 0.4,
+                "emissive": "#0c0f15",
+                "specular": 0.95,
+                "transmission": 0.58,
+                "ior": 1.5,
+                "doubleSided": True,
+                "alphaMode": "BLEND",
+            },
+            "door": {
+                "baseColor": "#313842",
+                "opacity": 0.88,
+                "roughness": 0.16,
+                "metallic": 0.45,
+                "emissive": "#090b10",
+                "specular": 0.9,
+                "transmission": 0.08,
+                "ior": 1.48,
+                "doubleSided": True,
+                "alphaMode": "BLEND",
+            },
+        }
+    },
 }
 
 PREVIEW_ENVIRONMENTS: list[dict[str, Any]] = [
@@ -947,112 +1107,169 @@ def build_scene(
 
 
 def render_preview_html(default_state: dict[str, Any]) -> str:
-    return f"""<!doctype html>
-<html lang=\"en\">
+    html = """<!doctype html>
+<html lang="en">
 <head>
-  <meta charset=\"utf-8\" />
-  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DXF GLB Workbench</title>
   <style>
-    :root {{
+    :root {
       --bg: #eff1f7;
-      --panel: #ffffffcc;
+      --status-bg: #111827cc;
+      --status-text: #e5e7eb;
       --line: #d9dde8;
-      --text: #20242e;
       --muted: #6f788b;
-      --accent: #7460f6;
-    }}
-    html, body {{ margin: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif; }}
-    #root {{ display: grid; grid-template-columns: minmax(320px, 420px) 1fr; height: 100%; }}
-    #panel {{ overflow: auto; border-right: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(8px); padding: 16px; }}
-    #viewport {{ position: relative; min-height: 55vh; }}
-    #canvas-host {{ width: 100%; height: 100%; }}
-    #viewer-gui-host {{ position: absolute; right: 12px; top: 12px; z-index: 30; pointer-events: auto; }}
-    #viewer-gui-host .dg.main {{ opacity: 0.96; }}
-    .section {{ border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 12px; background: #fff; }}
-    .section h3 {{ margin: 0 0 10px 0; font-size: 14px; }}
-    .row {{ display: grid; grid-template-columns: 1fr 100px; gap: 8px; align-items: center; margin-bottom: 8px; }}
-    .row label {{ font-size: 12px; color: var(--muted); }}
-    .row input, .row select {{ width: 100%; box-sizing: border-box; }}
-    .actions {{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }}
-    button {{ border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; background: #fff; cursor: pointer; }}
-    button.primary {{ background: var(--accent); color: #fff; border-color: var(--accent); }}
-    button:disabled {{ opacity: 0.6; cursor: wait; }}
-    .material-grid {{ display: grid; grid-template-columns: 1fr; gap: 8px; }}
-    .material-card {{ border: 1px solid var(--line); border-radius: 10px; padding: 8px; }}
-    .material-card h4 {{ margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }}
-    #status {{ position: absolute; left: 12px; bottom: 12px; background: #111827cc; color: #e5e7eb; padding: 8px 10px; border-radius: 8px; font-size: 12px; max-width: 70%; z-index: 20; }}
-    #stats-host {{ position: absolute; left: 12px; top: 12px; z-index: 20; pointer-events: none; }}
-    .small {{ font-size: 11px; color: var(--muted); }}
-    .mono {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; }}
-    @media (max-width: 960px) {{
-      #root {{ grid-template-columns: 1fr; grid-template-rows: auto 1fr; }}
-      #panel {{ border-right: 0; border-bottom: 1px solid var(--line); max-height: 48vh; }}
-      #viewport {{ min-height: 52vh; }}
-      #viewer-gui-host {{ right: 8px; top: 8px; }}
-      #status {{ max-width: calc(100% - 24px); }}
-    }}
+    }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
+    }
+    #viewport {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    #canvas-host {
+      width: 100%;
+      height: 100%;
+    }
+    #viewer-gui-host {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 30;
+    }
+    #viewer-gui-host .dg.main {
+      opacity: 0.96;
+    }
+    #stats-host {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 21;
+      pointer-events: none;
+    }
+    #status {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 20;
+      background: var(--status-bg);
+      color: var(--status-text);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      max-width: 72%;
+      line-height: 1.35;
+    }
+    #paths {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      z-index: 20;
+      max-width: 62%;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #ffffffdd;
+      color: var(--muted);
+      padding: 7px 9px;
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      text-align: right;
+      overflow-wrap: anywhere;
+      line-height: 1.35;
+    }
+    @media (max-width: 960px) {
+      #viewer-gui-host {
+        top: 8px;
+        right: 8px;
+      }
+      #status {
+        max-width: calc(100% - 24px);
+      }
+      #paths {
+        right: 8px;
+        bottom: 8px;
+        max-width: calc(100% - 24px);
+        text-align: left;
+      }
+    }
   </style>
 </head>
 <body>
-<div id=\"root\">
-  <aside id=\"panel\">
-    <div class=\"section\">
-      <h3>Geometry</h3>
-      <div class=\"row\"><label for=\"doorMode\">door mode</label><select id=\"doorMode\"><option value=\"none\">none</option><option value=\"block\">block</option></select></div>
-      <div class=\"row\"><label for=\"wallHeight\">wall-height-m</label><input id=\"wallHeight\" type=\"number\" min=\"0.1\" step=\"0.1\" /></div>
-      <div class=\"row\"><label for=\"doorHeight\">door-height-m</label><input id=\"doorHeight\" type=\"number\" min=\"0.1\" step=\"0.1\" /></div>
-      <div class=\"row\"><label for=\"wallThickness\">wall-thickness-mm</label><input id=\"wallThickness\" type=\"number\" min=\"1\" step=\"1\" /></div>
-      <div class=\"row\"><label for=\"columnThickness\">column-thickness-mm</label><input id=\"columnThickness\" type=\"number\" min=\"1\" step=\"1\" /></div>
-      <div class=\"row\"><label for=\"groundThickness\">ground-thickness-m</label><input id=\"groundThickness\" type=\"number\" min=\"0.01\" step=\"0.01\" /></div>
-      <div class=\"row\"><label for=\"groundMargin\">ground-margin-m</label><input id=\"groundMargin\" type=\"number\" min=\"0\" step=\"0.1\" /></div>
-    </div>
+  <div id="viewport">
+    <div id="canvas-host"></div>
+    <div id="viewer-gui-host"></div>
+    <div id="stats-host"></div>
+    <div id="status">Initializing preview...</div>
+    <div id="paths"></div>
+    <input type="file" id="importProfileFile" accept="application/json" style="display:none" />
+  </div>
 
-    <div class=\"section\">
-      <h3>Materials</h3>
-      <div class=\"row\"><label for=\"preset\">preset</label><select id=\"preset\"></select></div>
-      <div class=\"material-grid\" id=\"materialCards\"></div>
-      <p class=\"small\">Material edits apply immediately in preview. Geometry edits require rebuild.</p>
-    </div>
-
-    <div class=\"section\">
-      <h3>Actions</h3>
-      <div class=\"actions\">
-        <button class=\"primary\" id=\"applyMaterials\">Apply Materials</button>
-        <button class=\"primary\" id=\"rebuild\">Rebuild Geometry</button>
-        <button id=\"rebuildWithProfile\">Rebuild + Write Profile</button>
-        <button id=\"copyCmd\">Copy CLI Args</button>
-        <button id=\"exportProfile\">Export Profile</button>
-        <button id=\"importProfileBtn\">Import Profile</button>
-      </div>
-      <input type=\"file\" id=\"importProfileFile\" accept=\"application/json\" style=\"display:none\" />
-      <p class=\"small mono\" id=\"paths\"></p>
-    </div>
-  </aside>
-  <main id=\"viewport\">
-    <div id=\"canvas-host\"></div>
-    <div id=\"viewer-gui-host\"></div>
-    <div id=\"stats-host\"></div>
-    <div id=\"status\">Initializing preview...</div>
-  </main>
-</div>
-
-<script type=\"importmap\">{{\"imports\":{{\"three\":\"https://unpkg.com/three@0.161.0/build/three.module.js\",\"three/addons/\":\"https://unpkg.com/three@0.161.0/examples/jsm/\",\"dat.gui\":\"https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js\"}}}}</script>
-<script type=\"module\">
+  <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.161.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.161.0/examples/jsm/","dat.gui":"https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js"}}</script>
+  <script type="module">
 import * as THREE from 'three';
-import {{ OrbitControls }} from 'three/addons/controls/OrbitControls.js';
-import {{ GLTFLoader }} from 'three/addons/loaders/GLTFLoader.js';
-import {{ EXRLoader }} from 'three/addons/loaders/EXRLoader.js';
-import {{ RoomEnvironment }} from 'three/addons/environments/RoomEnvironment.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import Stats from 'three/addons/libs/stats.module.js';
-import {{ GUI }} from 'dat.gui';
+import { GUI } from 'dat.gui';
 
-const state = {json.dumps(default_state, ensure_ascii=False)};
-const presets = {json.dumps(DEFAULT_STYLE_PRESETS, ensure_ascii=False)};
-const environmentPresets = {json.dumps(PREVIEW_ENVIRONMENTS, ensure_ascii=False)};
+const state = __DEFAULT_STATE__;
+const presets = __DEFAULT_STYLE_PRESETS__;
+const environmentPresets = __PREVIEW_ENVIRONMENTS__;
+
 const DEFAULT_CAMERA = '[default]';
+const MATERIAL_GROUPS = ['wall', 'door', 'ground'];
+const fallbackPreset = Object.keys(presets)[0];
 
-let currentProfile = structuredClone(state.profile);
+const statusEl = document.getElementById('status');
+const pathsEl = document.getElementById('paths');
+const canvasHost = document.getElementById('canvas-host');
+const guiHost = document.getElementById('viewer-gui-host');
+const statsHost = document.getElementById('stats-host');
+const importProfileInput = document.getElementById('importProfileFile');
+
+const deepClone = (value) => JSON.parse(JSON.stringify(value));
+const toNumber = (value, fallback) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+function normalizeLocalProfile(rawProfile, forcedPreset) {
+  const requestedPreset = forcedPreset || (rawProfile && rawProfile.preset) || fallbackPreset;
+  const presetName = Object.prototype.hasOwnProperty.call(presets, requestedPreset) ? requestedPreset : fallbackPreset;
+  const base = deepClone(presets[presetName]);
+  const incoming = rawProfile && typeof rawProfile === 'object' ? (rawProfile.materials && typeof rawProfile.materials === 'object' ? rawProfile.materials : rawProfile) : {};
+  MATERIAL_GROUPS.forEach((group) => {
+    base.materials[group] = base.materials[group] || {};
+    const source = incoming[group];
+    if (source && typeof source === 'object') {
+      Object.assign(base.materials[group], source);
+    }
+  });
+  base.preset = presetName;
+  return base;
+}
+
+const currentProfile = normalizeLocalProfile(state.profile || {}, (state.profile || {}).preset);
+const geometryDefaults = state.geometry || {};
+const geometryState = {
+  door_mode: geometryDefaults.door_mode === 'block' ? 'block' : 'none',
+  wall_height_m: toNumber(geometryDefaults.wall_height_m, 3.8),
+  door_height_m: toNumber(geometryDefaults.door_height_m, 2.4),
+  wall_thickness_mm: toNumber(geometryDefaults.wall_thickness_mm, 120),
+  column_thickness_mm: toNumber(geometryDefaults.column_thickness_mm, 180),
+  ground_thickness_m: toNumber(geometryDefaults.ground_thickness_m, 0.08),
+  ground_margin_m: toNumber(geometryDefaults.ground_margin_m, 0.6),
+};
+
 let modelRoot = null;
 let modelCameras = [];
 let activeCamera = null;
@@ -1062,31 +1279,7 @@ let loading = false;
 let environmentRequestId = 0;
 let suppressEnvironmentControllerCallback = false;
 
-const statusEl = document.getElementById('status');
-const pathsEl = document.getElementById('paths');
-const canvasHost = document.getElementById('canvas-host');
-const presetEl = document.getElementById('preset');
-const guiHost = document.getElementById('viewer-gui-host');
-const statsHost = document.getElementById('stats-host');
-
-const geometryIds = {{
-  door_mode: 'doorMode',
-  wall_height_m: 'wallHeight',
-  door_height_m: 'doorHeight',
-  wall_thickness_mm: 'wallThickness',
-  column_thickness_mm: 'columnThickness',
-  ground_thickness_m: 'groundThickness',
-  ground_margin_m: 'groundMargin',
-}};
-
-Object.keys(presets).forEach((key) => {{
-  const opt = document.createElement('option');
-  opt.value = key;
-  opt.textContent = key;
-  presetEl.appendChild(opt);
-}});
-
-const renderer = new THREE.WebGLRenderer({{ antialias: true }});
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(canvasHost.clientWidth, canvasHost.clientHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -1108,10 +1301,8 @@ controls.screenSpacePanning = true;
 controls.target.set(0, 1.5, 0);
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
-ambientLight.name = 'ambient_light';
 scene.add(ambientLight);
 const directLight = new THREE.DirectionalLight(0xffffff, Math.PI * 0.8);
-directLight.name = 'main_light';
 directLight.position.set(0.5, 0.9, 0.7);
 scene.add(directLight);
 
@@ -1135,12 +1326,12 @@ stats.dom.style.position = 'static';
 stats.dom.style.display = 'none';
 statsHost.appendChild(stats.dom);
 
-const toneMappingModes = {{
-  'Linear': THREE.LinearToneMapping,
+const toneMappingModes = {
+  Linear: THREE.LinearToneMapping,
   'ACES Filmic': THREE.ACESFilmicToneMapping,
-}};
+};
 
-const viewerState = {{
+const viewerState = {
   background: false,
   autoRotate: false,
   wireframe: false,
@@ -1156,120 +1347,101 @@ const viewerState = {{
   camera: DEFAULT_CAMERA,
   playbackSpeed: 1.0,
   showStats: false,
-  actionStates: {{}},
-}};
+  actionStates: {},
+};
 
-const gui = new GUI({{ autoPlace: false, width: 290, hideable: true }});
+const gui = new GUI({ autoPlace: false, width: 320, hideable: true });
 guiHost.appendChild(gui.domElement);
 
-const displayFolder = gui.addFolder('Display');
-const lightingFolder = gui.addFolder('Lighting');
-const camerasFolder = gui.addFolder('Cameras');
-const animationFolder = gui.addFolder('Animation');
-const performanceFolder = gui.addFolder('Performance');
+const workbenchFolder = gui.addFolder('Workbench');
+const wbGeometryFolder = workbenchFolder.addFolder('Geometry');
+const wbMaterialsFolder = workbenchFolder.addFolder('Materials');
+const wbActionsFolder = workbenchFolder.addFolder('Actions');
+const viewerFolder = gui.addFolder('Viewer');
+const displayFolder = viewerFolder.addFolder('Display');
+const lightingFolder = viewerFolder.addFolder('Lighting');
+const camerasFolder = viewerFolder.addFolder('Cameras');
+const animationFolder = viewerFolder.addFolder('Animation');
+const performanceFolder = viewerFolder.addFolder('Performance');
 camerasFolder.domElement.style.display = 'none';
 animationFolder.domElement.style.display = 'none';
 
 const cameraControllers = [];
 const animationControllers = [];
+const materialControllers = [];
 let playbackSpeedController = null;
 let environmentController = null;
+let presetController = null;
 
-function clearFolderControllers(folder, controllers) {{
-  while (controllers.length) {{
-    folder.remove(controllers.pop());
-  }}
-}}
-
-displayFolder.add(viewerState, 'background').onChange(() => {{
-  updateEnvironmentState();
-}});
-displayFolder.add(viewerState, 'autoRotate').onChange(() => {{
-  controls.autoRotate = viewerState.autoRotate;
-}});
-displayFolder.add(viewerState, 'wireframe').onChange(() => {{
-  updateDisplayState();
-}});
-displayFolder.add(viewerState, 'grid').onChange(() => {{
-  updateDisplayState();
-}});
-displayFolder.add(viewerState, 'axes').onChange(() => {{
-  updateDisplayState();
-}});
-
-environmentController = lightingFolder
-  .add(viewerState, 'environment', environmentPresets.map((entry) => entry.name))
-  .onChange(() => {{
-    if (!suppressEnvironmentControllerCallback) {{
-      updateEnvironmentState();
-    }}
-  }});
-lightingFolder.add(viewerState, 'toneMapping', Object.keys(toneMappingModes)).onChange(() => {{
-  updateLightingState();
-}});
-lightingFolder.add(viewerState, 'exposure', -10, 10, 0.01).onChange(() => {{
-  updateLightingState();
-}});
-lightingFolder.add(viewerState, 'ambientIntensity', 0, 2, 0.01).onChange(() => {{
-  updateLightingState();
-}});
-lightingFolder.addColor(viewerState, 'ambientColor').onChange(() => {{
-  updateLightingState();
-}});
-lightingFolder.add(viewerState, 'directIntensity', 0, 8, 0.01).onChange(() => {{
-  updateLightingState();
-}});
-lightingFolder.addColor(viewerState, 'directColor').onChange(() => {{
-  updateLightingState();
-}});
-
-performanceFolder.add(viewerState, 'showStats').onChange(() => {{
-  stats.dom.style.display = viewerState.showStats ? '' : 'none';
-}});
-
-displayFolder.open();
-lightingFolder.open();
-
-function setStatus(msg) {{
+function setStatus(msg) {
   statusEl.textContent = msg;
-}}
+}
 
-function resize() {{
+function setPaths(glbUrl, jsonUrl) {
+  const glb = glbUrl || state.modelUrl || '';
+  const json = jsonUrl || state.jsonUrl || '';
+  pathsEl.textContent = json ? `GLB: ${glb} | JSON: ${json}` : `GLB: ${glb}`;
+}
+
+function clearFolderControllers(folder, controllers) {
+  while (controllers.length) {
+    folder.remove(controllers.pop());
+  }
+}
+
+function refreshMaterialControllers() {
+  materialControllers.forEach((controller) => controller.updateDisplay());
+}
+
+function applyProfileValues(profileLike, forcedPreset) {
+  const normalized = normalizeLocalProfile(profileLike || currentProfile, forcedPreset);
+  currentProfile.preset = normalized.preset;
+  MATERIAL_GROUPS.forEach((group) => {
+    currentProfile.materials[group] = currentProfile.materials[group] || {};
+    Object.keys(normalized.materials[group] || {}).forEach((key) => {
+      currentProfile.materials[group][key] = normalized.materials[group][key];
+    });
+  });
+  if (presetController) presetController.updateDisplay();
+  refreshMaterialControllers();
+}
+
+function resize() {
   const width = canvasHost.clientWidth;
   const height = Math.max(canvasHost.clientHeight, 1);
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
-  for (const cam of modelCameras) {{
-    if (cam.isPerspectiveCamera) {{
+  modelCameras.forEach((cam) => {
+    if (cam.isPerspectiveCamera) {
       cam.aspect = width / height;
       cam.updateProjectionMatrix();
-    }}
-  }}
+    }
+  });
   renderer.setSize(width, height);
-}}
+}
 window.addEventListener('resize', resize);
 
-function materialFromName(name) {{
+function materialFromName(name) {
   if (!name) return null;
   const lower = String(name).toLowerCase();
   if (lower.includes('ground')) return 'ground';
   if (lower.includes('door')) return 'door';
   if (lower.includes('wall')) return 'wall';
   return null;
-}}
+}
 
-function traverseModelMaterials(callback) {{
+function traverseModelMaterials(callback) {
   if (!modelRoot) return;
-  modelRoot.traverse((obj) => {{
+  modelRoot.traverse((obj) => {
     if (!obj.isMesh || !obj.material) return;
     const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
     materials.forEach(callback);
-  }});
-}}
+  });
+}
 
-function applyProfileToLoadedModel() {{
+function applyProfileToLoadedModel() {
   if (!modelRoot) return;
-  traverseModelMaterials((material) => {{
+  traverseModelMaterials((material) => {
     const group = materialFromName(material.name);
     if (!group || !currentProfile.materials[group]) return;
     const spec = currentProfile.materials[group];
@@ -1284,113 +1456,102 @@ function applyProfileToLoadedModel() {{
     if ('ior' in material) material.ior = spec.ior || 1.45;
     if ('specularIntensity' in material) material.specularIntensity = spec.specular || 0.5;
     material.needsUpdate = true;
-  }});
+  });
   updateDisplayState();
-}}
+}
 
-function updateDisplayState() {{
+function updateDisplayState() {
   gridHelper.visible = viewerState.grid;
   axesHelper.visible = viewerState.axes;
   controls.autoRotate = viewerState.autoRotate;
-  traverseModelMaterials((material) => {{
+  traverseModelMaterials((material) => {
     material.wireframe = viewerState.wireframe;
     material.needsUpdate = true;
-  }});
-}}
+  });
+}
 
-function updateLightingState() {{
-  renderer.toneMapping = toneMappingModes[viewerState.toneMapping] ?? THREE.ACESFilmicToneMapping;
+function updateLightingState() {
+  renderer.toneMapping = toneMappingModes[viewerState.toneMapping] || THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = Math.pow(2, viewerState.exposure);
   ambientLight.intensity = viewerState.ambientIntensity;
   ambientLight.color.set(viewerState.ambientColor);
   directLight.intensity = viewerState.directIntensity;
   directLight.color.set(viewerState.directColor);
-}}
+}
 
-function getEnvironmentByName(name) {{
+function getEnvironmentByName(name) {
   return environmentPresets.find((entry) => entry.name === name) || environmentPresets[1];
-}}
+}
 
-async function getEnvironmentTextureByName(name) {{
-  if (environmentCache.has(name)) {{
-    return environmentCache.get(name);
-  }}
+async function getEnvironmentTextureByName(name) {
+  if (environmentCache.has(name)) return environmentCache.get(name);
   const env = getEnvironmentByName(name);
-  if (!env.path) {{
-    return neutralEnvironment;
-  }}
+  if (!env.path) return neutralEnvironment;
   const exr = await exrLoader.loadAsync(env.path);
   const texture = pmremGenerator.fromEquirectangular(exr).texture;
   exr.dispose();
   environmentCache.set(name, texture);
   return texture;
-}}
+}
 
-async function updateEnvironmentState() {{
+async function updateEnvironmentState() {
   const requestId = ++environmentRequestId;
   const requestedName = viewerState.environment;
   let texture = neutralEnvironment;
-  try {{
+  try {
     texture = await getEnvironmentTextureByName(requestedName);
-  }} catch (err) {{
+  } catch (err) {
     console.warn('Environment load failed, fallback to Neutral', err);
-    setStatus(`Environment fallback to Neutral (${{
-      err && err.message ? err.message : 'load error'
-    }})`);
+    setStatus(`Environment fallback to Neutral (${err && err.message ? err.message : 'load error'})`);
     suppressEnvironmentControllerCallback = true;
     viewerState.environment = 'Neutral';
-    environmentController.updateDisplay();
+    if (environmentController) environmentController.updateDisplay();
     suppressEnvironmentControllerCallback = false;
     texture = neutralEnvironment;
-  }}
+  }
   if (requestId !== environmentRequestId) return;
   scene.environment = texture;
   scene.background = viewerState.background ? (texture || sceneBgColor) : sceneBgColor;
-}}
+}
 
-function fitCameraToObject(root) {{
+function fitCameraToObject(root) {
   const box = new THREE.Box3().setFromObject(root);
   if (box.isEmpty()) return;
-
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
   const radius = Math.max(size.length() * 0.5, 0.5);
   const distance = radius / Math.max(Math.sin(THREE.MathUtils.degToRad(camera.fov * 0.5)), 0.2);
-
   camera.near = Math.max(radius / 100, 0.01);
   camera.far = Math.max(radius * 120, 100);
   camera.updateProjectionMatrix();
-
   camera.position.copy(center).add(new THREE.Vector3(distance * 0.75, distance * 0.52, distance * 0.75));
   controls.target.copy(center);
   controls.minDistance = radius * 0.02;
   controls.maxDistance = radius * 20;
   controls.update();
-}}
+}
 
-function disposeMaterial(material) {{
+function disposeMaterial(material) {
   if (!material) return;
-  for (const key of Object.keys(material)) {{
-    if (key === 'envMap') continue;
-    const maybeTex = material[key];
-    if (maybeTex && maybeTex.isTexture) {{
-      maybeTex.dispose();
-    }}
-  }}
+  Object.keys(material).forEach((key) => {
+    if (key === 'envMap') return;
+    const maybeTexture = material[key];
+    if (maybeTexture && maybeTexture.isTexture) maybeTexture.dispose();
+  });
   if (material.dispose) material.dispose();
-}}
+}
 
-function clearModelResources() {{
-  if (mixer) {{
+function clearModelResources() {
+  if (mixer) {
     mixer.stopAllAction();
     mixer = null;
-  }}
+  }
   clipActions = [];
-  viewerState.actionStates = {{}};
-  if (playbackSpeedController) {{
+  viewerState.actionStates = {};
+  if (playbackSpeedController) {
     animationFolder.remove(playbackSpeedController);
     playbackSpeedController = null;
-  }}
+  }
   clearFolderControllers(animationFolder, animationControllers);
   clearFolderControllers(camerasFolder, cameraControllers);
   animationFolder.domElement.style.display = 'none';
@@ -1403,317 +1564,320 @@ function clearModelResources() {{
 
   if (!modelRoot) return;
   scene.remove(modelRoot);
-  modelRoot.traverse((obj) => {{
+  modelRoot.traverse((obj) => {
     if (obj.geometry) obj.geometry.dispose();
-    if (obj.material) {{
+    if (obj.material) {
       const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
       materials.forEach(disposeMaterial);
-    }}
-  }});
+    }
+  });
   modelRoot = null;
-}}
+}
 
-function setActiveCamera(name) {{
-  if (name === DEFAULT_CAMERA) {{
+function setActiveCamera(name) {
+  if (name === DEFAULT_CAMERA) {
     activeCamera = camera;
     controls.enabled = true;
     controls.update();
     return;
-  }}
+  }
   const target = modelCameras.find((item) => item.name === name);
-  if (!target) {{
+  if (!target) {
     activeCamera = camera;
     viewerState.camera = DEFAULT_CAMERA;
     controls.enabled = true;
     controls.update();
     return;
-  }}
+  }
   activeCamera = target;
   controls.enabled = false;
-}}
+}
 
-function rebuildCameraControllers() {{
+function rebuildCameraControllers() {
   clearFolderControllers(camerasFolder, cameraControllers);
   const names = [DEFAULT_CAMERA, ...modelCameras.map((cam) => cam.name)];
-  if (names.length <= 1) {{
+  if (names.length <= 1) {
     camerasFolder.domElement.style.display = 'none';
     return;
-  }}
+  }
   camerasFolder.domElement.style.display = '';
   const ctrl = camerasFolder.add(viewerState, 'camera', names);
   ctrl.onChange((name) => setActiveCamera(name));
   cameraControllers.push(ctrl);
-}}
+}
 
-function rebuildAnimationControllers(clips) {{
-  if (playbackSpeedController) {{
+function rebuildAnimationControllers(clips) {
+  if (playbackSpeedController) {
     animationFolder.remove(playbackSpeedController);
     playbackSpeedController = null;
-  }}
+  }
   clearFolderControllers(animationFolder, animationControllers);
-  viewerState.actionStates = {{}};
-
-  if (!clips.length) {{
+  viewerState.actionStates = {};
+  if (!clips.length) {
     animationFolder.domElement.style.display = 'none';
     return;
-  }}
-
+  }
   animationFolder.domElement.style.display = '';
   playbackSpeedController = animationFolder.add(viewerState, 'playbackSpeed', 0, 2, 0.01);
-  playbackSpeedController.onChange((speed) => {{
+  playbackSpeedController.onChange((speed) => {
     if (mixer) mixer.timeScale = speed;
-  }});
-
-  clips.forEach((clip, index) => {{
-    const label = `${{index + 1}}. ${{clip.name || `clip_${{index + 1}}`}}`;
+  });
+  clips.forEach((clip, index) => {
+    const label = `${index + 1}. ${clip.name || `clip_${index + 1}`}`;
     viewerState.actionStates[label] = index === 0;
     const action = clipActions[index];
-    if (index === 0) {{
-      action.reset().play();
-    }} else {{
-      action.stop();
-    }}
+    if (index === 0) action.reset().play();
+    else action.stop();
     const ctrl = animationFolder.add(viewerState.actionStates, label).listen();
-    ctrl.onChange((enabled) => {{
-      if (enabled) {{
-        action.reset().play();
-      }} else {{
-        action.stop();
-      }}
-    }});
+    ctrl.onChange((enabled) => {
+      if (enabled) action.reset().play();
+      else action.stop();
+    });
     animationControllers.push(ctrl);
-  }});
-}}
+  });
+}
 
 const loader = new GLTFLoader();
 
-async function loadModel(url) {{
+async function loadModel(url) {
   clearModelResources();
-
   setStatus('Loading model...');
   const gltf = await loader.loadAsync(url);
   modelRoot = gltf.scene || (gltf.scenes && gltf.scenes[0]) || null;
-  if (!modelRoot) {{
-    throw new Error('Model contains no scene');
-  }}
-
+  if (!modelRoot) throw new Error('Model contains no scene');
   scene.add(modelRoot);
   fitCameraToObject(modelRoot);
 
   modelCameras = [];
   let cameraIndex = 1;
-  modelRoot.traverse((node) => {{
-    if (node.isCamera) {{
-      if (!node.name) node.name = `VIEWER_camera_${{cameraIndex++}}`;
-      if (node.isPerspectiveCamera) {{
+  modelRoot.traverse((node) => {
+    if (node.isCamera) {
+      if (!node.name) node.name = `VIEWER_camera_${cameraIndex++}`;
+      if (node.isPerspectiveCamera) {
         node.aspect = camera.aspect;
         node.updateProjectionMatrix();
-      }}
+      }
       modelCameras.push(node);
-    }}
-  }});
+    }
+  });
 
-  if (gltf.animations && gltf.animations.length) {{
+  if (gltf.animations && gltf.animations.length) {
     mixer = new THREE.AnimationMixer(modelRoot);
     mixer.timeScale = viewerState.playbackSpeed;
     clipActions = gltf.animations.map((clip) => mixer.clipAction(clip));
     rebuildAnimationControllers(gltf.animations);
-  }} else {{
+  } else {
     rebuildAnimationControllers([]);
-  }}
+  }
 
   rebuildCameraControllers();
   setActiveCamera(viewerState.camera);
   applyProfileToLoadedModel();
   updateDisplayState();
   setStatus('Model ready');
-}}
+}
 
-function renderMaterialCards() {{
-  const host = document.getElementById('materialCards');
-  host.innerHTML = '';
-  ['wall', 'door', 'ground'].forEach((group) => {{
-    const spec = currentProfile.materials[group];
-    const card = document.createElement('div');
-    card.className = 'material-card';
-    card.innerHTML = `
-      <h4>${{group}}</h4>
-      <div class=\"row\"><label>baseColor</label><input data-mgroup=\"${{group}}\" data-mkey=\"baseColor\" type=\"color\" value=\"${{spec.baseColor}}\" /></div>
-      <div class=\"row\"><label>opacity</label><input data-mgroup=\"${{group}}\" data-mkey=\"opacity\" type=\"range\" min=\"0\" max=\"1\" step=\"0.01\" value=\"${{spec.opacity}}\" /></div>
-      <div class=\"row\"><label>roughness</label><input data-mgroup=\"${{group}}\" data-mkey=\"roughness\" type=\"range\" min=\"0\" max=\"1\" step=\"0.01\" value=\"${{spec.roughness}}\" /></div>
-      <div class=\"row\"><label>metallic</label><input data-mgroup=\"${{group}}\" data-mkey=\"metallic\" type=\"range\" min=\"0\" max=\"1\" step=\"0.01\" value=\"${{spec.metallic}}\" /></div>
-      <div class=\"row\"><label>emissive</label><input data-mgroup=\"${{group}}\" data-mkey=\"emissive\" type=\"color\" value=\"${{spec.emissive}}\" /></div>
-      <div class=\"row\"><label>specular</label><input data-mgroup=\"${{group}}\" data-mkey=\"specular\" type=\"range\" min=\"0\" max=\"1\" step=\"0.01\" value=\"${{spec.specular}}\" /></div>
-      <div class=\"row\"><label>transmission</label><input data-mgroup=\"${{group}}\" data-mkey=\"transmission\" type=\"range\" min=\"0\" max=\"1\" step=\"0.01\" value=\"${{spec.transmission}}\" /></div>
-      <div class=\"row\"><label>ior</label><input data-mgroup=\"${{group}}\" data-mkey=\"ior\" type=\"range\" min=\"1\" max=\"2.5\" step=\"0.01\" value=\"${{spec.ior}}\" /></div>
-    `;
-    host.appendChild(card);
-  }});
+function getGeometryPayload() {
+  return {
+    door_mode: geometryState.door_mode === 'block' ? 'block' : 'none',
+    wall_height_m: toNumber(geometryState.wall_height_m, 3.8),
+    door_height_m: toNumber(geometryState.door_height_m, 2.4),
+    wall_thickness_mm: toNumber(geometryState.wall_thickness_mm, 120),
+    column_thickness_mm: toNumber(geometryState.column_thickness_mm, 180),
+    ground_thickness_m: toNumber(geometryState.ground_thickness_m, 0.08),
+    ground_margin_m: toNumber(geometryState.ground_margin_m, 0.6),
+  };
+}
 
-  host.querySelectorAll('input').forEach((input) => {{
-    input.addEventListener('input', () => {{
-      const group = input.dataset.mgroup;
-      const key = input.dataset.mkey;
-      const value = input.type === 'color' ? input.value : Number(input.value);
-      currentProfile.materials[group][key] = value;
-      applyProfileToLoadedModel();
-    }});
-  }});
-}}
-
-function readGeometryFromUi() {{
-  return {{
-    door_mode: document.getElementById(geometryIds.door_mode).value,
-    wall_height_m: Number(document.getElementById(geometryIds.wall_height_m).value),
-    door_height_m: Number(document.getElementById(geometryIds.door_height_m).value),
-    wall_thickness_mm: Number(document.getElementById(geometryIds.wall_thickness_mm).value),
-    column_thickness_mm: Number(document.getElementById(geometryIds.column_thickness_mm).value),
-    ground_thickness_m: Number(document.getElementById(geometryIds.ground_thickness_m).value),
-    ground_margin_m: Number(document.getElementById(geometryIds.ground_margin_m).value),
-  }};
-}}
-
-function writeGeometryToUi(geometry) {{
-  document.getElementById(geometryIds.door_mode).value = geometry.door_mode;
-  document.getElementById(geometryIds.wall_height_m).value = geometry.wall_height_m;
-  document.getElementById(geometryIds.door_height_m).value = geometry.door_height_m;
-  document.getElementById(geometryIds.wall_thickness_mm).value = geometry.wall_thickness_mm;
-  document.getElementById(geometryIds.column_thickness_mm).value = geometry.column_thickness_mm;
-  document.getElementById(geometryIds.ground_thickness_m).value = geometry.ground_thickness_m;
-  document.getElementById(geometryIds.ground_margin_m).value = geometry.ground_margin_m;
-}}
-
-async function apiPost(path, payload) {{
-  const response = await fetch(path, {{
+async function apiPost(path, payload) {
+  const response = await fetch(path, {
     method: 'POST',
-    headers: {{ 'Content-Type': 'application/json' }},
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
-  }});
+  });
   const data = await response.json();
-  if (!response.ok || !data.ok) throw new Error(data.error || `HTTP ${{response.status}}`);
+  if (!response.ok || !data.ok) throw new Error(data.error || `HTTP ${response.status}`);
   return data;
-}}
+}
 
-async function rebuild(applyMaterialToExport) {{
-  if (!state.apiEnabled || loading) return;
-  loading = true;
-  document.querySelectorAll('button').forEach((button) => (button.disabled = true));
-  setStatus('Rebuilding geometry...');
-  try {{
-    const payload = {{
-      geometry: readGeometryFromUi(),
-      material_profile: currentProfile,
-      apply_material_to_export: Boolean(applyMaterialToExport),
-    }};
-    const data = await apiPost('/api/rebuild', payload);
-    pathsEl.textContent = `GLB: ${{data.glb_url}} | JSON: ${{data.json_url}}`;
-    await loadModel(data.glb_url);
-    setStatus(`Rebuild done (minY=${{Number(data.final_bbox.min_y ?? 0).toFixed(4)}})`);
-  }} catch (err) {{
-    setStatus(`Rebuild failed: ${{err.message}}`);
-  }} finally {{
-    document.querySelectorAll('button').forEach((button) => (button.disabled = false));
-    loading = false;
-  }}
-}}
-
-function downloadJson(filename, data) {{
-  const blob = new Blob([JSON.stringify(data, null, 2)], {{ type: 'application/json' }});
+function downloadJson(filename, data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
-}}
+}
 
-function copyCliArgs() {{
-  const g = readGeometryFromUi();
-  const text = `--door-mode ${{g.door_mode}} --wall-height-m ${{g.wall_height_m}} --door-height-m ${{g.door_height_m}} --wall-thickness-mm ${{g.wall_thickness_mm}} --column-thickness-mm ${{g.column_thickness_mm}} --ground-thickness-m ${{g.ground_thickness_m}} --ground-margin-m ${{g.ground_margin_m}}`;
+function copyCliArgs() {
+  const g = getGeometryPayload();
+  const text = `--door-mode ${g.door_mode} --wall-height-m ${g.wall_height_m} --door-height-m ${g.door_height_m} --wall-thickness-mm ${g.wall_thickness_mm} --column-thickness-mm ${g.column_thickness_mm} --ground-thickness-m ${g.ground_thickness_m} --ground-margin-m ${g.ground_margin_m}`;
   navigator.clipboard.writeText(text).then(() => setStatus('CLI args copied')).catch(() => setStatus('Copy failed'));
-}}
+}
 
-presetEl.addEventListener('change', () => {{
-  const key = presetEl.value;
-  currentProfile = structuredClone(presets[key]);
-  currentProfile.preset = key;
-  renderMaterialCards();
+async function rebuild(applyMaterialToExport) {
+  if (!state.apiEnabled) {
+    setStatus('Rebuild API disabled in static preview mode');
+    return;
+  }
+  if (loading) return;
+  loading = true;
+  setStatus('Rebuilding geometry...');
+  try {
+    const payload = {
+      geometry: getGeometryPayload(),
+      material_profile: currentProfile,
+      apply_material_to_export: Boolean(applyMaterialToExport),
+    };
+    const data = await apiPost('/api/rebuild', payload);
+    setPaths(data.glb_url, data.json_url);
+    await loadModel(data.glb_url);
+    setStatus(`Rebuild done (minY=${Number(data.final_bbox.min_y ?? 0).toFixed(4)})`);
+  } catch (err) {
+    setStatus(`Rebuild failed: ${err.message}`);
+  } finally {
+    loading = false;
+  }
+}
+
+const workbenchMaterialState = { preset: currentProfile.preset };
+const workbenchActions = {
+  applyMaterials: async () => {
+    if (state.apiEnabled) {
+      try {
+        const data = await apiPost('/api/material/preview', { profile: currentProfile });
+        applyProfileValues(data.profile, data.profile && data.profile.preset);
+      } catch (err) {
+        setStatus(`Material preview normalize failed: ${err.message}`);
+      }
+    }
+    applyProfileToLoadedModel();
+    setStatus('Materials applied in preview');
+  },
+  rebuildGeometry: () => rebuild(false),
+  rebuildWriteProfile: () => rebuild(true),
+  copyCliArgs: () => copyCliArgs(),
+  exportProfile: () => {
+    downloadJson('material_profile.json', currentProfile);
+    setStatus('Profile exported');
+  },
+  importProfile: () => importProfileInput.click(),
+};
+
+wbGeometryFolder.add(geometryState, 'door_mode', ['none', 'block']).name('door mode');
+wbGeometryFolder.add(geometryState, 'wall_height_m', 0.1, 300, 0.1).name('wall-height-m');
+wbGeometryFolder.add(geometryState, 'door_height_m', 0.1, 300, 0.1).name('door-height-m');
+wbGeometryFolder.add(geometryState, 'wall_thickness_mm', 1, 10000, 1).name('wall-thickness-mm');
+wbGeometryFolder.add(geometryState, 'column_thickness_mm', 1, 10000, 1).name('column-thickness-mm');
+wbGeometryFolder.add(geometryState, 'ground_thickness_m', 0.001, 10, 0.01).name('ground-thickness-m');
+wbGeometryFolder.add(geometryState, 'ground_margin_m', 0, 1000, 0.1).name('ground-margin-m');
+
+presetController = wbMaterialsFolder.add(workbenchMaterialState, 'preset', Object.keys(presets)).name('preset');
+presetController.onChange((name) => {
+  applyProfileValues(presets[name], name);
   applyProfileToLoadedModel();
-  setStatus(`Preset applied: ${{key}}`);
-}});
+  setStatus(`Preset applied: ${name}`);
+});
 
-document.getElementById('applyMaterials').addEventListener('click', async () => {{
-  if (state.apiEnabled) {{
-    try {{
-      const data = await apiPost('/api/material/preview', {{ profile: currentProfile }});
-      currentProfile = data.profile;
-      renderMaterialCards();
-    }} catch (err) {{
-      setStatus(`Material preview normalize failed: ${{err.message}}`);
-    }}
-  }}
-  applyProfileToLoadedModel();
-  setStatus('Materials applied in preview');
-}});
+MATERIAL_GROUPS.forEach((group) => {
+  const folder = wbMaterialsFolder.addFolder(group.toUpperCase());
+  const target = currentProfile.materials[group];
+  materialControllers.push(folder.addColor(target, 'baseColor').name('baseColor').onChange(() => applyProfileToLoadedModel()));
+  materialControllers.push(folder.add(target, 'opacity', 0, 1, 0.01).name('opacity').onChange(() => applyProfileToLoadedModel()));
+  materialControllers.push(folder.add(target, 'roughness', 0, 1, 0.01).name('roughness').onChange(() => applyProfileToLoadedModel()));
+  materialControllers.push(folder.add(target, 'metallic', 0, 1, 0.01).name('metallic').onChange(() => applyProfileToLoadedModel()));
+  materialControllers.push(folder.addColor(target, 'emissive').name('emissive').onChange(() => applyProfileToLoadedModel()));
+  materialControllers.push(folder.add(target, 'specular', 0, 1, 0.01).name('specular').onChange(() => applyProfileToLoadedModel()));
+  materialControllers.push(folder.add(target, 'transmission', 0, 1, 0.01).name('transmission').onChange(() => applyProfileToLoadedModel()));
+  materialControllers.push(folder.add(target, 'ior', 1, 2.5, 0.01).name('ior').onChange(() => applyProfileToLoadedModel()));
+  materialControllers.push(folder.add(target, 'doubleSided').name('doubleSided').onChange(() => applyProfileToLoadedModel()));
+  materialControllers.push(folder.add(target, 'alphaMode', ['OPAQUE', 'BLEND']).name('alphaMode').onChange(() => applyProfileToLoadedModel()));
+});
 
-document.getElementById('rebuild').addEventListener('click', () => rebuild(false));
-document.getElementById('rebuildWithProfile').addEventListener('click', () => rebuild(true));
-document.getElementById('copyCmd').addEventListener('click', copyCliArgs);
+wbActionsFolder.add(workbenchActions, 'applyMaterials').name('Apply Materials');
+wbActionsFolder.add(workbenchActions, 'rebuildGeometry').name('Rebuild Geometry');
+wbActionsFolder.add(workbenchActions, 'rebuildWriteProfile').name('Rebuild + Write Profile');
+wbActionsFolder.add(workbenchActions, 'copyCliArgs').name('Copy CLI Args');
+wbActionsFolder.add(workbenchActions, 'exportProfile').name('Export Profile');
+wbActionsFolder.add(workbenchActions, 'importProfile').name('Import Profile');
 
-document.getElementById('exportProfile').addEventListener('click', () => {{
-  downloadJson('material_profile.json', currentProfile);
-  setStatus('Profile exported');
-}});
+displayFolder.add(viewerState, 'background').onChange(() => updateEnvironmentState());
+displayFolder.add(viewerState, 'autoRotate').onChange(() => { controls.autoRotate = viewerState.autoRotate; });
+displayFolder.add(viewerState, 'wireframe').onChange(() => updateDisplayState());
+displayFolder.add(viewerState, 'grid').onChange(() => updateDisplayState());
+displayFolder.add(viewerState, 'axes').onChange(() => updateDisplayState());
 
-document.getElementById('importProfileBtn').addEventListener('click', () => {{
-  document.getElementById('importProfileFile').click();
-}});
+environmentController = lightingFolder
+  .add(viewerState, 'environment', environmentPresets.map((entry) => entry.name))
+  .onChange(() => {
+    if (!suppressEnvironmentControllerCallback) updateEnvironmentState();
+  });
+lightingFolder.add(viewerState, 'toneMapping', Object.keys(toneMappingModes)).onChange(() => updateLightingState());
+lightingFolder.add(viewerState, 'exposure', -10, 10, 0.01).onChange(() => updateLightingState());
+lightingFolder.add(viewerState, 'ambientIntensity', 0, 2, 0.01).onChange(() => updateLightingState());
+lightingFolder.addColor(viewerState, 'ambientColor').onChange(() => updateLightingState());
+lightingFolder.add(viewerState, 'directIntensity', 0, 8, 0.01).onChange(() => updateLightingState());
+lightingFolder.addColor(viewerState, 'directColor').onChange(() => updateLightingState());
 
-document.getElementById('importProfileFile').addEventListener('change', async (evt) => {{
-  const file = evt.target.files?.[0];
+performanceFolder.add(viewerState, 'showStats').onChange(() => {
+  stats.dom.style.display = viewerState.showStats ? '' : 'none';
+});
+
+importProfileInput.addEventListener('change', async (evt) => {
+  const file = evt.target.files && evt.target.files[0];
   if (!file) return;
   const text = await file.text();
-  try {{
+  try {
     const parsed = JSON.parse(text);
-    if (state.apiEnabled) {{
-      const data = await apiPost('/api/profile/import', {{ profile: parsed }});
-      currentProfile = data.profile;
-    }} else {{
-      currentProfile = parsed;
-    }}
-    renderMaterialCards();
+    if (state.apiEnabled) {
+      const data = await apiPost('/api/profile/import', { profile: parsed });
+      applyProfileValues(data.profile, data.profile && data.profile.preset);
+    } else {
+      applyProfileValues(parsed, parsed && parsed.preset);
+    }
     applyProfileToLoadedModel();
     setStatus('Profile imported');
-  }} catch (err) {{
-    setStatus(`Invalid profile: ${{err.message}}`);
-  }}
-}});
+  } catch (err) {
+    setStatus(`Invalid profile: ${err.message}`);
+  }
+  importProfileInput.value = '';
+});
 
-writeGeometryToUi(state.geometry);
-presetEl.value = currentProfile.preset || Object.keys(presets)[0];
-renderMaterialCards();
+applyProfileValues(currentProfile, currentProfile.preset);
 updateDisplayState();
 updateLightingState();
 updateEnvironmentState();
+setPaths(state.modelUrl, state.jsonUrl);
 
 const initialModelUrl = state.modelUrl + (state.modelUrl.includes('?') ? '&' : '?') + 'ts=' + Date.now();
-loadModel(initialModelUrl).catch((err) => setStatus(`Model load failed: ${{err.message}}`));
-pathsEl.textContent = `GLB: ${{state.modelUrl}}${{state.jsonUrl ? ` | JSON: ${{state.jsonUrl}}` : ''}}`;
+loadModel(initialModelUrl).catch((err) => setStatus(`Model load failed: ${err.message}`));
+
+workbenchFolder.open();
+wbGeometryFolder.open();
+wbMaterialsFolder.open();
+displayFolder.open();
+lightingFolder.open();
 
 const clock = new THREE.Clock();
-function animate() {{
+function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
   controls.update();
   if (mixer) mixer.update(delta);
   stats.update();
   renderer.render(scene, activeCamera || camera);
-}}
+}
 animate();
-</script>
+  </script>
 </body>
 </html>
 """
+    return (
+        html.replace("__DEFAULT_STATE__", json.dumps(default_state, ensure_ascii=False))
+        .replace("__DEFAULT_STYLE_PRESETS__", json.dumps(DEFAULT_STYLE_PRESETS, ensure_ascii=False))
+        .replace("__PREVIEW_ENVIRONMENTS__", json.dumps(PREVIEW_ENVIRONMENTS, ensure_ascii=False))
+    )
 
 
 def normalize_geometry(payload: dict[str, Any] | None, base: dict[str, Any] | None = None) -> dict[str, Any]:
