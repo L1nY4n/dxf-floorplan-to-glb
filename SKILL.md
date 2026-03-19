@@ -68,6 +68,17 @@ The workbench supports:
 - Profile export/import as JSON
 - Optional rebuild with profile writeback (`Rebuild + Write Profile`)
 
+## Viewer Core Controls
+
+The preview layer is optimized with a `three-gltf-viewer`-style capability set while keeping DXF workflow controls unchanged:
+
+- Display: `background`, `autoRotate`, `wireframe`, `grid`, `axes`
+- Lighting: `environment`, `toneMapping`, `exposure`, ambient/direct light intensity and color
+- Cameras: default camera plus model camera switching (when cameras exist)
+- Animation: playback speed and per-clip toggles (when clips exist)
+- Performance: real-time stats panel toggle
+- Environment pipeline: `RoomEnvironment` neutral mode plus remote EXR environment presets with fallback to neutral when loading fails
+
 ## API Contract (serve mode)
 
 - `POST /api/rebuild`
@@ -88,6 +99,7 @@ The workbench supports:
 - This skill prioritizes structural clarity and tunability, not boolean wall openings.
 - Doors can be hidden by default to avoid oversized door box artifacts from CAD block transforms.
 - For final delivery QA, verify `final_bbox.min_y == 0` in emitted JSON.
+- Viewer design and control taxonomy are inspired by [`donmccurdy/three-gltf-viewer`](https://github.com/donmccurdy/three-gltf-viewer) (MIT).
 
 ## Resources
 

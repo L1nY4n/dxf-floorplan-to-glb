@@ -49,3 +49,5 @@ Round-trip profile JSON through server-side normalization.
 
 - In workbench mode, material changes can update preview instantly.
 - Geometry changes require `/api/rebuild` to regenerate GLB.
+- Viewer controls (display/lighting/camera/animation/performance) are client-side and do not change API payload shape.
+- Environment presets include neutral `RoomEnvironment` and remote EXR maps with automatic fallback.

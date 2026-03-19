@@ -84,7 +84,7 @@ DEFAULT_STYLE_PRESETS: dict[str, dict[str, Any]] = {
                 "doubleSided": True,
                 "alphaMode": "BLEND",
             },
-}
+        }
     },
     "frosted-purple": {
         "materials": {
@@ -167,6 +167,21 @@ DEFAULT_STYLE_PRESETS: dict[str, dict[str, Any]] = {
         }
     },
 }
+
+PREVIEW_ENVIRONMENTS: list[dict[str, Any]] = [
+    {"id": "", "name": "None", "path": None},
+    {"id": "neutral", "name": "Neutral", "path": None},
+    {
+        "id": "venice-sunset",
+        "name": "Venice Sunset",
+        "path": "https://storage.googleapis.com/donmccurdy-static/venice_sunset_1k.exr",
+    },
+    {
+        "id": "footprint-court",
+        "name": "Footprint Court (HDR Labs)",
+        "path": "https://storage.googleapis.com/donmccurdy-static/footprint_court_2k.exr",
+    },
+]
 
 
 @dataclass
@@ -948,10 +963,12 @@ def render_preview_html(default_state: dict[str, Any]) -> str:
       --accent: #7460f6;
     }}
     html, body {{ margin: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif; }}
-    #root {{ display: grid; grid-template-columns: minmax(320px, 400px) 1fr; height: 100%; }}
+    #root {{ display: grid; grid-template-columns: minmax(320px, 420px) 1fr; height: 100%; }}
     #panel {{ overflow: auto; border-right: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(8px); padding: 16px; }}
-    #viewport {{ position: relative; }}
+    #viewport {{ position: relative; min-height: 55vh; }}
     #canvas-host {{ width: 100%; height: 100%; }}
+    #viewer-gui-host {{ position: absolute; right: 12px; top: 12px; z-index: 30; pointer-events: auto; }}
+    #viewer-gui-host .dg.main {{ opacity: 0.96; }}
     .section {{ border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 12px; background: #fff; }}
     .section h3 {{ margin: 0 0 10px 0; font-size: 14px; }}
     .row {{ display: grid; grid-template-columns: 1fr 100px; gap: 8px; align-items: center; margin-bottom: 8px; }}
@@ -964,9 +981,17 @@ def render_preview_html(default_state: dict[str, Any]) -> str:
     .material-grid {{ display: grid; grid-template-columns: 1fr; gap: 8px; }}
     .material-card {{ border: 1px solid var(--line); border-radius: 10px; padding: 8px; }}
     .material-card h4 {{ margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }}
-    #status {{ position: absolute; left: 12px; bottom: 12px; background: #111827cc; color: #e5e7eb; padding: 8px 10px; border-radius: 8px; font-size: 12px; max-width: 70%; }}
+    #status {{ position: absolute; left: 12px; bottom: 12px; background: #111827cc; color: #e5e7eb; padding: 8px 10px; border-radius: 8px; font-size: 12px; max-width: 70%; z-index: 20; }}
+    #stats-host {{ position: absolute; left: 12px; top: 12px; z-index: 20; pointer-events: none; }}
     .small {{ font-size: 11px; color: var(--muted); }}
     .mono {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; }}
+    @media (max-width: 960px) {{
+      #root {{ grid-template-columns: 1fr; grid-template-rows: auto 1fr; }}
+      #panel {{ border-right: 0; border-bottom: 1px solid var(--line); max-height: 48vh; }}
+      #viewport {{ min-height: 52vh; }}
+      #viewer-gui-host {{ right: 8px; top: 8px; }}
+      #status {{ max-width: calc(100% - 24px); }}
+    }}
   </style>
 </head>
 <body>
@@ -1006,27 +1031,43 @@ def render_preview_html(default_state: dict[str, Any]) -> str:
   </aside>
   <main id=\"viewport\">
     <div id=\"canvas-host\"></div>
+    <div id=\"viewer-gui-host\"></div>
+    <div id=\"stats-host\"></div>
     <div id=\"status\">Initializing preview...</div>
   </main>
 </div>
 
-<script type=\"importmap\">{{\"imports\":{{\"three\":\"https://unpkg.com/three@0.161.0/build/three.module.js\",\"three/addons/\":\"https://unpkg.com/three@0.161.0/examples/jsm/\"}}}}</script>
+<script type=\"importmap\">{{\"imports\":{{\"three\":\"https://unpkg.com/three@0.161.0/build/three.module.js\",\"three/addons/\":\"https://unpkg.com/three@0.161.0/examples/jsm/\",\"dat.gui\":\"https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js\"}}}}</script>
 <script type=\"module\">
 import * as THREE from 'three';
 import {{ OrbitControls }} from 'three/addons/controls/OrbitControls.js';
 import {{ GLTFLoader }} from 'three/addons/loaders/GLTFLoader.js';
-import {{ RGBELoader }} from 'three/addons/loaders/RGBELoader.js';
+import {{ EXRLoader }} from 'three/addons/loaders/EXRLoader.js';
+import {{ RoomEnvironment }} from 'three/addons/environments/RoomEnvironment.js';
+import Stats from 'three/addons/libs/stats.module.js';
+import {{ GUI }} from 'dat.gui';
 
 const state = {json.dumps(default_state, ensure_ascii=False)};
 const presets = {json.dumps(DEFAULT_STYLE_PRESETS, ensure_ascii=False)};
+const environmentPresets = {json.dumps(PREVIEW_ENVIRONMENTS, ensure_ascii=False)};
+const DEFAULT_CAMERA = '[default]';
+
 let currentProfile = structuredClone(state.profile);
 let modelRoot = null;
+let modelCameras = [];
+let activeCamera = null;
+let mixer = null;
+let clipActions = [];
 let loading = false;
+let environmentRequestId = 0;
+let suppressEnvironmentControllerCallback = false;
 
 const statusEl = document.getElementById('status');
 const pathsEl = document.getElementById('paths');
 const canvasHost = document.getElementById('canvas-host');
 const presetEl = document.getElementById('preset');
+const guiHost = document.getElementById('viewer-gui-host');
+const statsHost = document.getElementById('stats-host');
 
 const geometryIds = {{
   door_mode: 'doorMode',
@@ -1054,115 +1095,437 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 canvasHost.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#eef1f8');
+const sceneBgColor = new THREE.Color('#eef1f8');
+scene.background = sceneBgColor;
 
-const camera = new THREE.PerspectiveCamera(52, canvasHost.clientWidth / canvasHost.clientHeight, 0.01, 10000);
+const camera = new THREE.PerspectiveCamera(52, canvasHost.clientWidth / Math.max(canvasHost.clientHeight, 1), 0.01, 10000);
 camera.position.set(8, 8, 8);
+activeCamera = camera;
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
+controls.screenSpacePanning = true;
 controls.target.set(0, 1.5, 0);
 
-const hemi = new THREE.HemisphereLight(0xffffff, 0xdde3f5, 0.8);
-scene.add(hemi);
-const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
-keyLight.position.set(8, 12, 6);
-scene.add(keyLight);
-const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
-fillLight.position.set(-6, 5, -8);
-scene.add(fillLight);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+ambientLight.name = 'ambient_light';
+scene.add(ambientLight);
+const directLight = new THREE.DirectionalLight(0xffffff, Math.PI * 0.8);
+directLight.name = 'main_light';
+directLight.position.set(0.5, 0.9, 0.7);
+scene.add(directLight);
 
-const grid = new THREE.GridHelper(120, 120, 0xb8bfd2, 0xd5daea);
-grid.position.y = 0;
-scene.add(grid);
+const gridHelper = new THREE.GridHelper(120, 120, 0xb8bfd2, 0xd5daea);
+gridHelper.position.y = 0;
+scene.add(gridHelper);
+const axesHelper = new THREE.AxesHelper(2.5);
+axesHelper.visible = false;
+scene.add(axesHelper);
 
-async function applyHdrEnvironment() {{
-  try {{
-    const hdr = await new RGBELoader().loadAsync('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr');
-    hdr.mapping = THREE.EquirectangularReflectionMapping;
-    scene.environment = hdr;
-  }} catch (err) {{
-    console.warn('HDR fallback to basic lighting', err);
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+pmremGenerator.compileEquirectangularShader();
+const neutralEnvironment = pmremGenerator.fromScene(new RoomEnvironment()).texture;
+const exrLoader = new EXRLoader();
+const environmentCache = new Map();
+environmentCache.set('None', null);
+environmentCache.set('Neutral', neutralEnvironment);
+
+const stats = new Stats();
+stats.dom.style.position = 'static';
+stats.dom.style.display = 'none';
+statsHost.appendChild(stats.dom);
+
+const toneMappingModes = {{
+  'Linear': THREE.LinearToneMapping,
+  'ACES Filmic': THREE.ACESFilmicToneMapping,
+}};
+
+const viewerState = {{
+  background: false,
+  autoRotate: false,
+  wireframe: false,
+  grid: true,
+  axes: false,
+  environment: 'Neutral',
+  toneMapping: 'ACES Filmic',
+  exposure: 0.0,
+  ambientIntensity: 0.55,
+  ambientColor: '#ffffff',
+  directIntensity: Math.PI * 0.8,
+  directColor: '#ffffff',
+  camera: DEFAULT_CAMERA,
+  playbackSpeed: 1.0,
+  showStats: false,
+  actionStates: {{}},
+}};
+
+const gui = new GUI({{ autoPlace: false, width: 290, hideable: true }});
+guiHost.appendChild(gui.domElement);
+
+const displayFolder = gui.addFolder('Display');
+const lightingFolder = gui.addFolder('Lighting');
+const camerasFolder = gui.addFolder('Cameras');
+const animationFolder = gui.addFolder('Animation');
+const performanceFolder = gui.addFolder('Performance');
+camerasFolder.domElement.style.display = 'none';
+animationFolder.domElement.style.display = 'none';
+
+const cameraControllers = [];
+const animationControllers = [];
+let playbackSpeedController = null;
+let environmentController = null;
+
+function clearFolderControllers(folder, controllers) {{
+  while (controllers.length) {{
+    folder.remove(controllers.pop());
   }}
 }}
-applyHdrEnvironment();
+
+displayFolder.add(viewerState, 'background').onChange(() => {{
+  updateEnvironmentState();
+}});
+displayFolder.add(viewerState, 'autoRotate').onChange(() => {{
+  controls.autoRotate = viewerState.autoRotate;
+}});
+displayFolder.add(viewerState, 'wireframe').onChange(() => {{
+  updateDisplayState();
+}});
+displayFolder.add(viewerState, 'grid').onChange(() => {{
+  updateDisplayState();
+}});
+displayFolder.add(viewerState, 'axes').onChange(() => {{
+  updateDisplayState();
+}});
+
+environmentController = lightingFolder
+  .add(viewerState, 'environment', environmentPresets.map((entry) => entry.name))
+  .onChange(() => {{
+    if (!suppressEnvironmentControllerCallback) {{
+      updateEnvironmentState();
+    }}
+  }});
+lightingFolder.add(viewerState, 'toneMapping', Object.keys(toneMappingModes)).onChange(() => {{
+  updateLightingState();
+}});
+lightingFolder.add(viewerState, 'exposure', -10, 10, 0.01).onChange(() => {{
+  updateLightingState();
+}});
+lightingFolder.add(viewerState, 'ambientIntensity', 0, 2, 0.01).onChange(() => {{
+  updateLightingState();
+}});
+lightingFolder.addColor(viewerState, 'ambientColor').onChange(() => {{
+  updateLightingState();
+}});
+lightingFolder.add(viewerState, 'directIntensity', 0, 8, 0.01).onChange(() => {{
+  updateLightingState();
+}});
+lightingFolder.addColor(viewerState, 'directColor').onChange(() => {{
+  updateLightingState();
+}});
+
+performanceFolder.add(viewerState, 'showStats').onChange(() => {{
+  stats.dom.style.display = viewerState.showStats ? '' : 'none';
+}});
+
+displayFolder.open();
+lightingFolder.open();
 
 function setStatus(msg) {{
   statusEl.textContent = msg;
 }}
 
 function resize() {{
-  const w = canvasHost.clientWidth;
-  const h = canvasHost.clientHeight;
-  camera.aspect = w / Math.max(h, 1);
+  const width = canvasHost.clientWidth;
+  const height = Math.max(canvasHost.clientHeight, 1);
+  camera.aspect = width / height;
   camera.updateProjectionMatrix();
-  renderer.setSize(w, h);
+  for (const cam of modelCameras) {{
+    if (cam.isPerspectiveCamera) {{
+      cam.aspect = width / height;
+      cam.updateProjectionMatrix();
+    }}
+  }}
+  renderer.setSize(width, height);
 }}
 window.addEventListener('resize', resize);
 
 function materialFromName(name) {{
   if (!name) return null;
-  if (name.includes('ground')) return 'ground';
-  if (name.includes('door')) return 'door';
-  if (name.includes('wall')) return 'wall';
+  const lower = String(name).toLowerCase();
+  if (lower.includes('ground')) return 'ground';
+  if (lower.includes('door')) return 'door';
+  if (lower.includes('wall')) return 'wall';
   return null;
+}}
+
+function traverseModelMaterials(callback) {{
+  if (!modelRoot) return;
+  modelRoot.traverse((obj) => {{
+    if (!obj.isMesh || !obj.material) return;
+    const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+    materials.forEach(callback);
+  }});
 }}
 
 function applyProfileToLoadedModel() {{
   if (!modelRoot) return;
+  traverseModelMaterials((material) => {{
+    const group = materialFromName(material.name);
+    if (!group || !currentProfile.materials[group]) return;
+    const spec = currentProfile.materials[group];
+    material.color.set(spec.baseColor);
+    material.opacity = spec.opacity;
+    material.transparent = spec.opacity < 0.999 || spec.alphaMode === 'BLEND';
+    material.roughness = spec.roughness;
+    material.metalness = spec.metallic;
+    material.side = spec.doubleSided ? THREE.DoubleSide : THREE.FrontSide;
+    if (material.emissive) material.emissive.set(spec.emissive || '#000000');
+    if ('transmission' in material) material.transmission = spec.transmission || 0;
+    if ('ior' in material) material.ior = spec.ior || 1.45;
+    if ('specularIntensity' in material) material.specularIntensity = spec.specular || 0.5;
+    material.needsUpdate = true;
+  }});
+  updateDisplayState();
+}}
+
+function updateDisplayState() {{
+  gridHelper.visible = viewerState.grid;
+  axesHelper.visible = viewerState.axes;
+  controls.autoRotate = viewerState.autoRotate;
+  traverseModelMaterials((material) => {{
+    material.wireframe = viewerState.wireframe;
+    material.needsUpdate = true;
+  }});
+}}
+
+function updateLightingState() {{
+  renderer.toneMapping = toneMappingModes[viewerState.toneMapping] ?? THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = Math.pow(2, viewerState.exposure);
+  ambientLight.intensity = viewerState.ambientIntensity;
+  ambientLight.color.set(viewerState.ambientColor);
+  directLight.intensity = viewerState.directIntensity;
+  directLight.color.set(viewerState.directColor);
+}}
+
+function getEnvironmentByName(name) {{
+  return environmentPresets.find((entry) => entry.name === name) || environmentPresets[1];
+}}
+
+async function getEnvironmentTextureByName(name) {{
+  if (environmentCache.has(name)) {{
+    return environmentCache.get(name);
+  }}
+  const env = getEnvironmentByName(name);
+  if (!env.path) {{
+    return neutralEnvironment;
+  }}
+  const exr = await exrLoader.loadAsync(env.path);
+  const texture = pmremGenerator.fromEquirectangular(exr).texture;
+  exr.dispose();
+  environmentCache.set(name, texture);
+  return texture;
+}}
+
+async function updateEnvironmentState() {{
+  const requestId = ++environmentRequestId;
+  const requestedName = viewerState.environment;
+  let texture = neutralEnvironment;
+  try {{
+    texture = await getEnvironmentTextureByName(requestedName);
+  }} catch (err) {{
+    console.warn('Environment load failed, fallback to Neutral', err);
+    setStatus(`Environment fallback to Neutral (${{
+      err && err.message ? err.message : 'load error'
+    }})`);
+    suppressEnvironmentControllerCallback = true;
+    viewerState.environment = 'Neutral';
+    environmentController.updateDisplay();
+    suppressEnvironmentControllerCallback = false;
+    texture = neutralEnvironment;
+  }}
+  if (requestId !== environmentRequestId) return;
+  scene.environment = texture;
+  scene.background = viewerState.background ? (texture || sceneBgColor) : sceneBgColor;
+}}
+
+function fitCameraToObject(root) {{
+  const box = new THREE.Box3().setFromObject(root);
+  if (box.isEmpty()) return;
+
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const radius = Math.max(size.length() * 0.5, 0.5);
+  const distance = radius / Math.max(Math.sin(THREE.MathUtils.degToRad(camera.fov * 0.5)), 0.2);
+
+  camera.near = Math.max(radius / 100, 0.01);
+  camera.far = Math.max(radius * 120, 100);
+  camera.updateProjectionMatrix();
+
+  camera.position.copy(center).add(new THREE.Vector3(distance * 0.75, distance * 0.52, distance * 0.75));
+  controls.target.copy(center);
+  controls.minDistance = radius * 0.02;
+  controls.maxDistance = radius * 20;
+  controls.update();
+}}
+
+function disposeMaterial(material) {{
+  if (!material) return;
+  for (const key of Object.keys(material)) {{
+    if (key === 'envMap') continue;
+    const maybeTex = material[key];
+    if (maybeTex && maybeTex.isTexture) {{
+      maybeTex.dispose();
+    }}
+  }}
+  if (material.dispose) material.dispose();
+}}
+
+function clearModelResources() {{
+  if (mixer) {{
+    mixer.stopAllAction();
+    mixer = null;
+  }}
+  clipActions = [];
+  viewerState.actionStates = {{}};
+  if (playbackSpeedController) {{
+    animationFolder.remove(playbackSpeedController);
+    playbackSpeedController = null;
+  }}
+  clearFolderControllers(animationFolder, animationControllers);
+  clearFolderControllers(camerasFolder, cameraControllers);
+  animationFolder.domElement.style.display = 'none';
+  camerasFolder.domElement.style.display = 'none';
+  modelCameras = [];
+  viewerState.camera = DEFAULT_CAMERA;
+  activeCamera = camera;
+  controls.enabled = true;
+  controls.update();
+
+  if (!modelRoot) return;
+  scene.remove(modelRoot);
   modelRoot.traverse((obj) => {{
-    if (!obj.isMesh || !obj.material) return;
-    const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
-    mats.forEach((m) => {{
-      const group = materialFromName(m.name);
-      if (!group || !currentProfile.materials[group]) return;
-      const spec = currentProfile.materials[group];
-      m.color.set(spec.baseColor);
-      m.opacity = spec.opacity;
-      m.transparent = spec.opacity < 0.999 || spec.alphaMode === 'BLEND';
-      m.roughness = spec.roughness;
-      m.metalness = spec.metallic;
-      m.side = spec.doubleSided ? THREE.DoubleSide : THREE.FrontSide;
-      if (m.emissive) m.emissive.set(spec.emissive || '#000000');
-      if ('transmission' in m) m.transmission = spec.transmission || 0;
-      if ('ior' in m) m.ior = spec.ior || 1.45;
-      if ('specularIntensity' in m) m.specularIntensity = spec.specular || 0.5;
-      m.needsUpdate = true;
+    if (obj.geometry) obj.geometry.dispose();
+    if (obj.material) {{
+      const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+      materials.forEach(disposeMaterial);
+    }}
+  }});
+  modelRoot = null;
+}}
+
+function setActiveCamera(name) {{
+  if (name === DEFAULT_CAMERA) {{
+    activeCamera = camera;
+    controls.enabled = true;
+    controls.update();
+    return;
+  }}
+  const target = modelCameras.find((item) => item.name === name);
+  if (!target) {{
+    activeCamera = camera;
+    viewerState.camera = DEFAULT_CAMERA;
+    controls.enabled = true;
+    controls.update();
+    return;
+  }}
+  activeCamera = target;
+  controls.enabled = false;
+}}
+
+function rebuildCameraControllers() {{
+  clearFolderControllers(camerasFolder, cameraControllers);
+  const names = [DEFAULT_CAMERA, ...modelCameras.map((cam) => cam.name)];
+  if (names.length <= 1) {{
+    camerasFolder.domElement.style.display = 'none';
+    return;
+  }}
+  camerasFolder.domElement.style.display = '';
+  const ctrl = camerasFolder.add(viewerState, 'camera', names);
+  ctrl.onChange((name) => setActiveCamera(name));
+  cameraControllers.push(ctrl);
+}}
+
+function rebuildAnimationControllers(clips) {{
+  if (playbackSpeedController) {{
+    animationFolder.remove(playbackSpeedController);
+    playbackSpeedController = null;
+  }}
+  clearFolderControllers(animationFolder, animationControllers);
+  viewerState.actionStates = {{}};
+
+  if (!clips.length) {{
+    animationFolder.domElement.style.display = 'none';
+    return;
+  }}
+
+  animationFolder.domElement.style.display = '';
+  playbackSpeedController = animationFolder.add(viewerState, 'playbackSpeed', 0, 2, 0.01);
+  playbackSpeedController.onChange((speed) => {{
+    if (mixer) mixer.timeScale = speed;
+  }});
+
+  clips.forEach((clip, index) => {{
+    const label = `${{index + 1}}. ${{clip.name || `clip_${{index + 1}}`}}`;
+    viewerState.actionStates[label] = index === 0;
+    const action = clipActions[index];
+    if (index === 0) {{
+      action.reset().play();
+    }} else {{
+      action.stop();
+    }}
+    const ctrl = animationFolder.add(viewerState.actionStates, label).listen();
+    ctrl.onChange((enabled) => {{
+      if (enabled) {{
+        action.reset().play();
+      }} else {{
+        action.stop();
+      }}
     }});
+    animationControllers.push(ctrl);
   }});
 }}
 
 const loader = new GLTFLoader();
-function fitCameraToObject(root) {{
-  const box = new THREE.Box3().setFromObject(root);
-  const size = box.getSize(new THREE.Vector3());
-  const center = box.getCenter(new THREE.Vector3());
-  const maxDim = Math.max(size.x, size.y, size.z, 1);
-  const distance = maxDim * 1.6;
-  camera.position.set(center.x + distance, center.y + distance * 0.9, center.z + distance);
-  controls.target.set(center.x, Math.max(center.y, 0.6), center.z);
-  controls.update();
-}}
 
 async function loadModel(url) {{
-  if (modelRoot) {{
-    scene.remove(modelRoot);
-    modelRoot.traverse((obj) => {{
-      if (obj.geometry) obj.geometry.dispose();
-      if (obj.material) {{
-        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
-        mats.forEach((m) => m.dispose && m.dispose());
-      }}
-    }});
-    modelRoot = null;
-  }}
+  clearModelResources();
 
   setStatus('Loading model...');
   const gltf = await loader.loadAsync(url);
-  modelRoot = gltf.scene;
+  modelRoot = gltf.scene || (gltf.scenes && gltf.scenes[0]) || null;
+  if (!modelRoot) {{
+    throw new Error('Model contains no scene');
+  }}
+
   scene.add(modelRoot);
   fitCameraToObject(modelRoot);
+
+  modelCameras = [];
+  let cameraIndex = 1;
+  modelRoot.traverse((node) => {{
+    if (node.isCamera) {{
+      if (!node.name) node.name = `VIEWER_camera_${{cameraIndex++}}`;
+      if (node.isPerspectiveCamera) {{
+        node.aspect = camera.aspect;
+        node.updateProjectionMatrix();
+      }}
+      modelCameras.push(node);
+    }}
+  }});
+
+  if (gltf.animations && gltf.animations.length) {{
+    mixer = new THREE.AnimationMixer(modelRoot);
+    mixer.timeScale = viewerState.playbackSpeed;
+    clipActions = gltf.animations.map((clip) => mixer.clipAction(clip));
+    rebuildAnimationControllers(gltf.animations);
+  }} else {{
+    rebuildAnimationControllers([]);
+  }}
+
+  rebuildCameraControllers();
+  setActiveCamera(viewerState.camera);
   applyProfileToLoadedModel();
+  updateDisplayState();
   setStatus('Model ready');
 }}
 
@@ -1234,7 +1597,7 @@ async function apiPost(path, payload) {{
 async function rebuild(applyMaterialToExport) {{
   if (!state.apiEnabled || loading) return;
   loading = true;
-  document.querySelectorAll('button').forEach((b) => (b.disabled = true));
+  document.querySelectorAll('button').forEach((button) => (button.disabled = true));
   setStatus('Rebuilding geometry...');
   try {{
     const payload = {{
@@ -1245,11 +1608,11 @@ async function rebuild(applyMaterialToExport) {{
     const data = await apiPost('/api/rebuild', payload);
     pathsEl.textContent = `GLB: ${{data.glb_url}} | JSON: ${{data.json_url}}`;
     await loadModel(data.glb_url);
-    setStatus(`Rebuild done (minY=${{data.final_bbox.min_y.toFixed(4)}})`);
+    setStatus(`Rebuild done (minY=${{Number(data.final_bbox.min_y ?? 0).toFixed(4)}})`);
   }} catch (err) {{
     setStatus(`Rebuild failed: ${{err.message}}`);
   }} finally {{
-    document.querySelectorAll('button').forEach((b) => (b.disabled = false));
+    document.querySelectorAll('button').forEach((button) => (button.disabled = false));
     loading = false;
   }}
 }}
@@ -1257,10 +1620,10 @@ async function rebuild(applyMaterialToExport) {{
 function downloadJson(filename, data) {{
   const blob = new Blob([JSON.stringify(data, null, 2)], {{ type: 'application/json' }});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
   URL.revokeObjectURL(url);
 }}
 
@@ -1329,15 +1692,22 @@ document.getElementById('importProfileFile').addEventListener('change', async (e
 writeGeometryToUi(state.geometry);
 presetEl.value = currentProfile.preset || Object.keys(presets)[0];
 renderMaterialCards();
+updateDisplayState();
+updateLightingState();
+updateEnvironmentState();
 
 const initialModelUrl = state.modelUrl + (state.modelUrl.includes('?') ? '&' : '?') + 'ts=' + Date.now();
 loadModel(initialModelUrl).catch((err) => setStatus(`Model load failed: ${{err.message}}`));
 pathsEl.textContent = `GLB: ${{state.modelUrl}}${{state.jsonUrl ? ` | JSON: ${{state.jsonUrl}}` : ''}}`;
 
+const clock = new THREE.Clock();
 function animate() {{
   requestAnimationFrame(animate);
+  const delta = clock.getDelta();
   controls.update();
-  renderer.render(scene, camera);
+  if (mixer) mixer.update(delta);
+  stats.update();
+  renderer.render(scene, activeCamera || camera);
 }}
 animate();
 </script>

@@ -11,6 +11,8 @@ Default workflow is `serve` mode first: launch a local preview workbench, tune g
 - Door filtering mode (`none` or `block`)
 - Tunable wall/door/ground geometry
 - Interactive workbench UI with live material tuning
+- Viewer core controls: display, lighting, camera, animation, performance stats
+- Environment pipeline with neutral `RoomEnvironment` and remote EXR presets
 - API endpoints for rebuild/profile import/export
 
 ## Requirements
@@ -81,6 +83,7 @@ See [references/workbench-api.md](references/workbench-api.md) for request/respo
 
 - This project prioritizes structural clarity and tunability over boolean wall opening operations.
 - For final delivery QA, verify `final_bbox.min_y == 0` in emitted JSON.
+- Viewer UX/control taxonomy is inspired by [donmccurdy/three-gltf-viewer](https://github.com/donmccurdy/three-gltf-viewer) (MIT).
 
 ## License
 
