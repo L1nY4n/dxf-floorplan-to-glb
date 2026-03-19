@@ -8,12 +8,13 @@ description: Convert architectural DXF floorplans into grounded GLB scenes with 
 ## Overview
 
 Use `scripts/dxf_to_glb.py` to convert DXF floorplans into structured GLB output and generate a parameter workbench preview.
-Default workflow is `serve` mode first: start the local workbench, tune geometry/material interactively, then deliver the exported GLB/JSON from the workbench output directory.
+This skill must present an explicit mode choice to the user before execution: `serve` (preview workbench) or `build` (one-shot export).
+If the user has not clearly stated a mode, ask a short confirmation question first instead of assuming.
 Default geometry/material behavior targets stable web delivery: grounded model (`minY=0`), XZ centering, and crystal-purple transparent wall style.
 
 ## Quick Start
 
-Run local interactive workbench with APIs (default):
+Mode A: interactive preview workbench (`serve`)
 
 ```bash
 python3 scripts/dxf_to_glb.py serve \
@@ -25,7 +26,7 @@ python3 scripts/dxf_to_glb.py serve \
 
 Then open `http://127.0.0.1:8124`, tune parameters in the UI, and use the latest exported files in `--out-dir` (`scene_latest.glb`, `scene_latest.json`, `material_profile_latest.json`).
 
-One-shot build (optional, non-interactive/batch use):
+Mode B: one-shot export (`build`)
 
 ```bash
 python3 scripts/dxf_to_glb.py build \
@@ -34,6 +35,13 @@ python3 scripts/dxf_to_glb.py build \
   --emit-json /tmp/floorplan.json \
   --preview-html /tmp/floorplan_preview.html
 ```
+
+## Interaction Contract
+
+- Required: explicitly confirm mode with the user before running commands when the request is ambiguous.
+- Suggested confirmation wording: "Do you want preview mode (`serve`) or direct export (`build`)?"
+- If user selects `serve`: start local workbench, return URL, and wait for user to finish tuning before final delivery.
+- If user selects `build`: run one-shot export and return output paths directly.
 
 ## Geometry Controls
 

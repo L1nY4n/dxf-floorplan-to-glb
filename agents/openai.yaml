@@ -1,4 +1,4 @@
 interface:
   display_name: "DXF To GLB"
   short_description: "DXF to GLB with interactive geometry and material tuning."
-  default_prompt: "Start in serve mode by default: launch the local workbench, tune geometry/material interactively, then export grounded GLB/JSON deliverables from the workbench output."
+  default_prompt: "First explicitly ask the user whether to use preview mode (serve) or direct export (build). After the user chooses, execute only that mode and return the resulting paths/URL."
