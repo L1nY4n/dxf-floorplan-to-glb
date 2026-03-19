@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Local environments
+.venv/
+venv/
+.env
+
+# Build / output artifacts
+output/
+*.glb
+*_preview.html
+index.html
+*.log
+*.pid
+scene_latest.json
+material_profile_latest.json
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

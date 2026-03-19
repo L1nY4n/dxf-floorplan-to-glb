@@ -1,0 +1,41 @@
+{
+  "preset": "crystal-purple",
+  "materials": {
+    "ground": {
+      "baseColor": "#eef0f8",
+      "opacity": 1.0,
+      "roughness": 0.88,
+      "metallic": 0.02,
+      "emissive": "#000000",
+      "specular": 0.42,
+      "transmission": 0.0,
+      "ior": 1.45,
+      "doubleSided": true,
+      "alphaMode": "OPAQUE"
+    },
+    "wall": {
+      "baseColor": "#9d8bff",
+      "opacity": 0.34,
+      "roughness": 0.06,
+      "metallic": 0.0,
+      "emissive": "#120a36",
+      "specular": 0.84,
+      "transmission": 0.88,
+      "ior": 1.48,
+      "doubleSided": true,
+      "alphaMode": "BLEND"
+    },
+    "door": {
+      "baseColor": "#4f3ac6",
+      "opacity": 0.78,
+      "roughness": 0.18,
+      "metallic": 0.05,
+      "emissive": "#080419",
+      "specular": 0.62,
+      "transmission": 0.2,
+      "ior": 1.45,
+      "doubleSided": true,
+      "alphaMode": "BLEND"
+    }
+  }
+}
