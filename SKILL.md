@@ -42,6 +42,7 @@ python3 scripts/dxf_to_glb.py build \
 - Suggested confirmation wording: "Do you want preview mode (`serve`) or direct export (`build`)?"
 - If user selects `serve`: start local workbench, return URL, and wait for user to finish tuning before final delivery.
 - If user selects `build`: run one-shot export and return output paths directly.
+- After final model delivery from `serve`: stop the Python preview process and clean runtime leftovers (`server.pid`, stale temp runtime files/logs) while keeping final deliverables.
 
 ## Geometry Controls
 
