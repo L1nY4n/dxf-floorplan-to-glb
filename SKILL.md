@@ -65,7 +65,8 @@ The workbench supports:
 
 - Preset switching (`crystal-purple`, `frosted-purple`, `mirror-purple`, `warm-sand`, `ocean-cyan`, `emerald-glass`, `charcoal-tech`)
 - Per-group editing for `wall`, `door`, `ground`
-- Real-time preview updates for color/opacity/roughness/metallic/emissive/specular/transmission/ior
+- Per-group finish presets (`custom` + architectural surface styles like paint/concrete/metal/wood/glass)
+- Real-time preview updates for color/opacity/roughness/metallic/emissive/specular/transmission/ior/clearcoat/sheen
 - Profile export/import as JSON
 - Optional rebuild with profile writeback (`Rebuild + Write Profile`)
 

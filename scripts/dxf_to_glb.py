@@ -329,6 +329,225 @@ DEFAULT_STYLE_PRESETS: dict[str, dict[str, Any]] = {
     },
 }
 
+MATERIAL_SPEC_DEFAULTS: dict[str, Any] = {
+    "baseColor": "#ffffff",
+    "opacity": 1.0,
+    "roughness": 0.5,
+    "metallic": 0.0,
+    "emissive": "#000000",
+    "specular": 0.5,
+    "transmission": 0.0,
+    "ior": 1.45,
+    "doubleSided": True,
+    "alphaMode": "OPAQUE",
+    "clearcoat": 0.0,
+    "clearcoatRoughness": 0.2,
+    "sheen": 0.0,
+    "sheenColor": "#ffffff",
+    "sheenRoughness": 1.0,
+    "finish": "custom",
+}
+
+MATERIAL_SURFACE_PRESETS: dict[str, dict[str, dict[str, Any]]] = {
+    "wall": {
+        "matte-paint": {
+            "baseColor": "#d6d9df",
+            "roughness": 0.9,
+            "metallic": 0.0,
+            "specular": 0.2,
+            "sheen": 0.1,
+            "sheenColor": "#ffffff",
+            "sheenRoughness": 0.95,
+            "clearcoat": 0.0,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+        "microcement": {
+            "baseColor": "#b8bcc3",
+            "roughness": 0.56,
+            "metallic": 0.04,
+            "specular": 0.5,
+            "clearcoat": 0.14,
+            "clearcoatRoughness": 0.22,
+            "sheen": 0.0,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+        "brushed-aluminum": {
+            "baseColor": "#7f8794",
+            "roughness": 0.34,
+            "metallic": 0.84,
+            "specular": 0.95,
+            "clearcoat": 0.08,
+            "clearcoatRoughness": 0.12,
+            "sheen": 0.0,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+        "frosted-glass": {
+            "baseColor": "#d9e6f5",
+            "roughness": 0.45,
+            "metallic": 0.0,
+            "specular": 0.88,
+            "transmission": 0.72,
+            "ior": 1.45,
+            "clearcoat": 0.0,
+            "sheen": 0.0,
+            "opacity": 0.85,
+            "alphaMode": "BLEND",
+        },
+        "acoustic-fabric": {
+            "baseColor": "#7f8692",
+            "roughness": 0.92,
+            "metallic": 0.0,
+            "specular": 0.08,
+            "sheen": 0.35,
+            "sheenColor": "#c7cfda",
+            "sheenRoughness": 0.86,
+            "clearcoat": 0.0,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+    },
+    "door": {
+        "oak-wood": {
+            "baseColor": "#8f6841",
+            "roughness": 0.62,
+            "metallic": 0.0,
+            "specular": 0.34,
+            "clearcoat": 0.16,
+            "clearcoatRoughness": 0.38,
+            "sheen": 0.08,
+            "sheenColor": "#f4ead8",
+            "sheenRoughness": 0.74,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+        "walnut-wood": {
+            "baseColor": "#5b3f2a",
+            "roughness": 0.58,
+            "metallic": 0.0,
+            "specular": 0.3,
+            "clearcoat": 0.22,
+            "clearcoatRoughness": 0.32,
+            "sheen": 0.06,
+            "sheenColor": "#d0b59b",
+            "sheenRoughness": 0.7,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+        "powder-metal": {
+            "baseColor": "#646d7a",
+            "roughness": 0.36,
+            "metallic": 0.75,
+            "specular": 0.92,
+            "clearcoat": 0.1,
+            "clearcoatRoughness": 0.24,
+            "sheen": 0.0,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+        "tinted-glass": {
+            "baseColor": "#6f8fa8",
+            "roughness": 0.12,
+            "metallic": 0.04,
+            "specular": 0.85,
+            "transmission": 0.82,
+            "ior": 1.46,
+            "clearcoat": 0.0,
+            "sheen": 0.0,
+            "opacity": 0.74,
+            "alphaMode": "BLEND",
+        },
+        "painted-wood": {
+            "baseColor": "#f3f1ed",
+            "roughness": 0.52,
+            "metallic": 0.0,
+            "specular": 0.4,
+            "clearcoat": 0.24,
+            "clearcoatRoughness": 0.26,
+            "sheen": 0.06,
+            "sheenColor": "#ffffff",
+            "sheenRoughness": 0.78,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+    },
+    "ground": {
+        "raw-concrete": {
+            "baseColor": "#c3c7cc",
+            "roughness": 0.93,
+            "metallic": 0.0,
+            "specular": 0.16,
+            "clearcoat": 0.0,
+            "sheen": 0.0,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+        "polished-concrete": {
+            "baseColor": "#b8bcc3",
+            "roughness": 0.3,
+            "metallic": 0.03,
+            "specular": 0.58,
+            "clearcoat": 0.36,
+            "clearcoatRoughness": 0.14,
+            "sheen": 0.0,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+        "terrazzo": {
+            "baseColor": "#e2ddd4",
+            "roughness": 0.46,
+            "metallic": 0.01,
+            "specular": 0.56,
+            "clearcoat": 0.42,
+            "clearcoatRoughness": 0.2,
+            "sheen": 0.08,
+            "sheenColor": "#f5eee2",
+            "sheenRoughness": 0.66,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+        "oak-floor": {
+            "baseColor": "#a97f52",
+            "roughness": 0.55,
+            "metallic": 0.0,
+            "specular": 0.32,
+            "clearcoat": 0.2,
+            "clearcoatRoughness": 0.35,
+            "sheen": 0.12,
+            "sheenColor": "#f7e9ce",
+            "sheenRoughness": 0.68,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+        "epoxy-floor": {
+            "baseColor": "#9cb4cc",
+            "roughness": 0.12,
+            "metallic": 0.02,
+            "specular": 0.92,
+            "clearcoat": 0.72,
+            "clearcoatRoughness": 0.08,
+            "sheen": 0.0,
+            "transmission": 0.0,
+            "opacity": 1.0,
+            "alphaMode": "OPAQUE",
+        },
+    },
+}
+
 PREVIEW_ENVIRONMENTS: list[dict[str, Any]] = [
     {"id": "", "name": "None", "path": None},
     {"id": "neutral", "name": "Neutral", "path": None},
@@ -403,15 +622,38 @@ def hex_to_rgb01(value: str) -> list[float]:
     ]
 
 
-def normalize_material_entry(raw: dict[str, Any], fallback: dict[str, Any]) -> dict[str, Any]:
-    base = dict(fallback)
-    if isinstance(raw, dict):
-        base.update(raw)
+def normalize_material_entry(material_name: str, raw: dict[str, Any], fallback: dict[str, Any]) -> dict[str, Any]:
+    surface_catalog = MATERIAL_SURFACE_PRESETS.get(material_name, {})
+    incoming = raw if isinstance(raw, dict) else {}
+
+    finish = str(incoming.get("finish", fallback.get("finish", "custom"))).strip().lower()
+    if finish and finish != "custom" and finish in surface_catalog:
+        base = dict(MATERIAL_SPEC_DEFAULTS)
+        base.update(fallback)
+        base.update(surface_catalog[finish])
+    else:
+        finish = "custom"
+        base = dict(MATERIAL_SPEC_DEFAULTS)
+        base.update(fallback)
+
+    base.update(incoming)
+    base["finish"] = finish
 
     color = normalize_hex_color(str(base.get("baseColor", "#ffffff")), "#ffffff")
     emissive = normalize_hex_color(str(base.get("emissive", "#000000")), "#000000")
+    sheen_color = normalize_hex_color(str(base.get("sheenColor", "#ffffff")), "#ffffff")
+
+    alpha_mode = str(
+        base.get(
+            "alphaMode",
+            "BLEND" if float(base.get("opacity", MATERIAL_SPEC_DEFAULTS["opacity"])) < 1 else "OPAQUE",
+        )
+    ).upper()
+    if alpha_mode not in {"OPAQUE", "MASK", "BLEND"}:
+        alpha_mode = "BLEND" if float(base.get("opacity", 1.0)) < 1.0 else "OPAQUE"
 
     return {
+        "finish": finish,
         "baseColor": color,
         "opacity": clamp(float(base.get("opacity", 1.0)), 0.0, 1.0),
         "roughness": clamp(float(base.get("roughness", 0.5)), 0.0, 1.0),
@@ -420,8 +662,13 @@ def normalize_material_entry(raw: dict[str, Any], fallback: dict[str, Any]) -> d
         "specular": clamp(float(base.get("specular", 0.5)), 0.0, 1.0),
         "transmission": clamp(float(base.get("transmission", 0.0)), 0.0, 1.0),
         "ior": clamp(float(base.get("ior", 1.45)), 1.0, 2.5),
+        "clearcoat": clamp(float(base.get("clearcoat", 0.0)), 0.0, 1.0),
+        "clearcoatRoughness": clamp(float(base.get("clearcoatRoughness", 0.2)), 0.0, 1.0),
+        "sheen": clamp(float(base.get("sheen", 0.0)), 0.0, 1.0),
+        "sheenColor": sheen_color,
+        "sheenRoughness": clamp(float(base.get("sheenRoughness", 1.0)), 0.0, 1.0),
         "doubleSided": bool(base.get("doubleSided", True)),
-        "alphaMode": str(base.get("alphaMode", "BLEND" if float(base.get("opacity", 1.0)) < 1 else "OPAQUE")).upper(),
+        "alphaMode": alpha_mode,
     }
 
 
@@ -440,6 +687,7 @@ def normalize_profile(profile_payload: dict[str, Any] | None, preset_name: str |
     materials: dict[str, dict[str, Any]] = {}
     for name in SEMANTIC_MATERIALS:
         materials[name] = normalize_material_entry(
+            name,
             incoming_materials.get(name, {}) if isinstance(incoming_materials.get(name), dict) else {},
             preset["materials"][name],
         )
@@ -866,6 +1114,22 @@ def material_to_gltf(name: str, spec: dict[str, Any]) -> tuple[dict[str, Any], s
         extensions["KHR_materials_specular"] = {"specularFactor": clamp(specular, 0.0, 1.0)}
         extensions_used.add("KHR_materials_specular")
 
+    clearcoat = float(spec.get("clearcoat", 0.0))
+    if clearcoat > 0:
+        extensions["KHR_materials_clearcoat"] = {
+            "clearcoatFactor": clamp(clearcoat, 0.0, 1.0),
+            "clearcoatRoughnessFactor": clamp(float(spec.get("clearcoatRoughness", 0.2)), 0.0, 1.0),
+        }
+        extensions_used.add("KHR_materials_clearcoat")
+
+    sheen = float(spec.get("sheen", 0.0))
+    if sheen > 0:
+        extensions["KHR_materials_sheen"] = {
+            "sheenColorFactor": [channel * sheen for channel in hex_to_rgb01(str(spec.get("sheenColor", "#ffffff")))],
+            "sheenRoughnessFactor": clamp(float(spec.get("sheenRoughness", 1.0)), 0.0, 1.0),
+        }
+        extensions_used.add("KHR_materials_sheen")
+
     if extensions:
         material["extensions"] = extensions
 
@@ -1281,6 +1545,8 @@ import { GUI } from 'dat.gui';
 
 const state = __DEFAULT_STATE__;
 const presets = __DEFAULT_STYLE_PRESETS__;
+const materialSpecDefaults = __MATERIAL_SPEC_DEFAULTS__;
+const materialSurfacePresets = __MATERIAL_SURFACE_PRESETS__;
 const environmentPresets = __PREVIEW_ENVIRONMENTS__;
 
 const DEFAULT_CAMERA = '[default]';
@@ -1299,6 +1565,46 @@ const toNumber = (value, fallback) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
 };
+const clamp01 = (value, fallback) => Math.min(1, Math.max(0, toNumber(value, fallback)));
+const normalizeHex = (value, fallback) => {
+  const raw = String(value || '').trim().toLowerCase().replace(/^#/, '');
+  const expanded = raw.length === 3 ? raw.split('').map((ch) => ch + ch).join('') : raw;
+  return /^[0-9a-f]{6}$/.test(expanded) ? `#${expanded}` : fallback;
+};
+
+function normalizeMaterialSpecLocal(group, rawSpec, fallbackSpec) {
+  const source = rawSpec && typeof rawSpec === 'object' ? rawSpec : {};
+  const fallback = fallbackSpec && typeof fallbackSpec === 'object' ? fallbackSpec : {};
+  const catalog = materialSurfacePresets[group] || {};
+
+  let finish = String(source.finish || fallback.finish || materialSpecDefaults.finish || 'custom').toLowerCase();
+  if (!Object.prototype.hasOwnProperty.call(catalog, finish)) finish = 'custom';
+
+  const merged = Object.assign({}, materialSpecDefaults, fallback);
+  if (finish !== 'custom') Object.assign(merged, catalog[finish] || {});
+  Object.assign(merged, source);
+  merged.finish = finish;
+
+  merged.baseColor = normalizeHex(merged.baseColor, materialSpecDefaults.baseColor || '#ffffff');
+  merged.emissive = normalizeHex(merged.emissive, materialSpecDefaults.emissive || '#000000');
+  merged.sheenColor = normalizeHex(merged.sheenColor, materialSpecDefaults.sheenColor || '#ffffff');
+  merged.opacity = clamp01(merged.opacity, 1.0);
+  merged.roughness = clamp01(merged.roughness, 0.5);
+  merged.metallic = clamp01(merged.metallic, 0.0);
+  merged.specular = clamp01(merged.specular, 0.5);
+  merged.transmission = clamp01(merged.transmission, 0.0);
+  merged.clearcoat = clamp01(merged.clearcoat, 0.0);
+  merged.clearcoatRoughness = clamp01(merged.clearcoatRoughness, 0.2);
+  merged.sheen = clamp01(merged.sheen, 0.0);
+  merged.sheenRoughness = clamp01(merged.sheenRoughness, 1.0);
+  merged.ior = Math.min(2.5, Math.max(1.0, toNumber(merged.ior, 1.45)));
+  merged.doubleSided = Boolean(merged.doubleSided);
+  merged.alphaMode = String(merged.alphaMode || (merged.opacity < 0.999 ? 'BLEND' : 'OPAQUE')).toUpperCase();
+  if (!['OPAQUE', 'BLEND', 'MASK'].includes(merged.alphaMode)) {
+    merged.alphaMode = merged.opacity < 0.999 ? 'BLEND' : 'OPAQUE';
+  }
+  return merged;
+}
 
 function normalizeLocalProfile(rawProfile, forcedPreset) {
   const requestedPreset = forcedPreset || (rawProfile && rawProfile.preset) || fallbackPreset;
@@ -1306,11 +1612,12 @@ function normalizeLocalProfile(rawProfile, forcedPreset) {
   const base = deepClone(presets[presetName]);
   const incoming = rawProfile && typeof rawProfile === 'object' ? (rawProfile.materials && typeof rawProfile.materials === 'object' ? rawProfile.materials : rawProfile) : {};
   MATERIAL_GROUPS.forEach((group) => {
-    base.materials[group] = base.materials[group] || {};
     const source = incoming[group];
-    if (source && typeof source === 'object') {
-      Object.assign(base.materials[group], source);
-    }
+    base.materials[group] = normalizeMaterialSpecLocal(
+      group,
+      source && typeof source === 'object' ? source : {},
+      base.materials[group] || {},
+    );
   });
   base.preset = presetName;
   return base;
@@ -1469,12 +1776,18 @@ function applyProfileValues(profileLike, forcedPreset) {
 
 function remapWallsForClarity() {
   const wall = currentProfile.materials.wall || {};
+  wall.finish = 'custom';
   wall.opacity = 1.0;
   wall.alphaMode = 'OPAQUE';
   wall.transmission = 0.0;
   wall.roughness = Math.max(toNumber(wall.roughness, 0.35), 0.35);
   wall.metallic = Math.min(toNumber(wall.metallic, 0.02), 0.12);
   wall.specular = Math.min(toNumber(wall.specular, 0.38), 0.45);
+  wall.clearcoat = Math.max(toNumber(wall.clearcoat, 0.08), 0.08);
+  wall.clearcoatRoughness = Math.max(toNumber(wall.clearcoatRoughness, 0.2), 0.2);
+  wall.sheen = Math.max(toNumber(wall.sheen, 0.06), 0.06);
+  wall.sheenColor = wall.sheenColor || '#ffffff';
+  wall.sheenRoughness = Math.max(toNumber(wall.sheenRoughness, 0.8), 0.8);
   wall.ior = 1.45;
   currentProfile.materials.wall = wall;
   refreshMaterialControllers();
@@ -1530,6 +1843,13 @@ function applyProfileToLoadedModel() {
     if ('transmission' in material) material.transmission = spec.transmission || 0;
     if ('ior' in material) material.ior = spec.ior || 1.45;
     if ('specularIntensity' in material) material.specularIntensity = spec.specular || 0.5;
+    if ('clearcoat' in material) material.clearcoat = spec.clearcoat || 0;
+    if ('clearcoatRoughness' in material) material.clearcoatRoughness = spec.clearcoatRoughness || 0;
+    if ('sheen' in material) material.sheen = spec.sheen || 0;
+    if ('sheenColor' in material && material.sheenColor && material.sheenColor.set) {
+      material.sheenColor.set(spec.sheenColor || '#ffffff');
+    }
+    if ('sheenRoughness' in material) material.sheenRoughness = spec.sheenRoughness || 1;
     material.needsUpdate = true;
   });
   updateDisplayState();
@@ -1872,6 +2192,28 @@ const workbenchActions = {
   importProfile: () => importProfileInput.click(),
 };
 
+function markMaterialAsCustom(group) {
+  const target = currentProfile.materials[group];
+  if (!target) return;
+  if (target.finish !== 'custom') target.finish = 'custom';
+}
+
+function applySurfaceFinish(group, finishName) {
+  const catalog = materialSurfacePresets[group] || {};
+  const target = currentProfile.materials[group];
+  if (!target) return;
+  if (finishName === 'custom' || !Object.prototype.hasOwnProperty.call(catalog, finishName)) {
+    target.finish = 'custom';
+    refreshMaterialControllers();
+    applyProfileToLoadedModel();
+    return;
+  }
+  const next = normalizeMaterialSpecLocal(group, Object.assign({}, catalog[finishName], { finish: finishName }), target);
+  Object.assign(target, next);
+  refreshMaterialControllers();
+  applyProfileToLoadedModel();
+}
+
 wbGeometryFolder.add(geometryState, 'door_mode', ['none', 'block']).name('door mode');
 wbGeometryFolder.add(geometryState, 'uniform_scale', 0.1, 5.0, 0.01).name('uniform-scale');
 wbGeometryFolder.add(geometryState, 'wall_height_m', 0.1, 300, 0.1).name('wall-height-m');
@@ -1891,16 +2233,101 @@ presetController.onChange((name) => {
 MATERIAL_GROUPS.forEach((group) => {
   const folder = wbMaterialsFolder.addFolder(group.toUpperCase());
   const target = currentProfile.materials[group];
-  materialControllers.push(folder.addColor(target, 'baseColor').name('baseColor').onChange(() => applyProfileToLoadedModel()));
-  materialControllers.push(folder.add(target, 'opacity', 0, 1, 0.01).name('opacity').onChange(() => applyProfileToLoadedModel()));
-  materialControllers.push(folder.add(target, 'roughness', 0, 1, 0.01).name('roughness').onChange(() => applyProfileToLoadedModel()));
-  materialControllers.push(folder.add(target, 'metallic', 0, 1, 0.01).name('metallic').onChange(() => applyProfileToLoadedModel()));
-  materialControllers.push(folder.addColor(target, 'emissive').name('emissive').onChange(() => applyProfileToLoadedModel()));
-  materialControllers.push(folder.add(target, 'specular', 0, 1, 0.01).name('specular').onChange(() => applyProfileToLoadedModel()));
-  materialControllers.push(folder.add(target, 'transmission', 0, 1, 0.01).name('transmission').onChange(() => applyProfileToLoadedModel()));
-  materialControllers.push(folder.add(target, 'ior', 1, 2.5, 0.01).name('ior').onChange(() => applyProfileToLoadedModel()));
-  materialControllers.push(folder.add(target, 'doubleSided').name('doubleSided').onChange(() => applyProfileToLoadedModel()));
-  materialControllers.push(folder.add(target, 'alphaMode', ['OPAQUE', 'BLEND']).name('alphaMode').onChange(() => applyProfileToLoadedModel()));
+  const finishNames = ['custom', ...Object.keys(materialSurfacePresets[group] || {})];
+
+  materialControllers.push(
+    folder.add(target, 'finish', finishNames).name('finish').onChange((value) => applySurfaceFinish(group, value)),
+  );
+  materialControllers.push(
+    folder.addColor(target, 'baseColor').name('baseColor').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.add(target, 'opacity', 0, 1, 0.01).name('opacity').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.add(target, 'roughness', 0, 1, 0.01).name('roughness').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.add(target, 'metallic', 0, 1, 0.01).name('metallic').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.addColor(target, 'emissive').name('emissive').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.add(target, 'specular', 0, 1, 0.01).name('specular').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.add(target, 'transmission', 0, 1, 0.01).name('transmission').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.add(target, 'ior', 1, 2.5, 0.01).name('ior').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.add(target, 'clearcoat', 0, 1, 0.01).name('clearcoat').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.add(target, 'clearcoatRoughness', 0, 1, 0.01).name('clearcoatR').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.add(target, 'sheen', 0, 1, 0.01).name('sheen').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.addColor(target, 'sheenColor').name('sheenColor').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.add(target, 'sheenRoughness', 0, 1, 0.01).name('sheenR').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.add(target, 'doubleSided').name('doubleSided').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
+  materialControllers.push(
+    folder.add(target, 'alphaMode', ['OPAQUE', 'BLEND', 'MASK']).name('alphaMode').onChange(() => {
+      markMaterialAsCustom(group);
+      applyProfileToLoadedModel();
+    }),
+  );
 });
 
 wbActionsFolder.add(workbenchActions, 'applyMaterials').name('Apply Materials');
@@ -1987,6 +2414,8 @@ animate();
     return (
         html.replace("__DEFAULT_STATE__", json.dumps(default_state, ensure_ascii=False))
         .replace("__DEFAULT_STYLE_PRESETS__", json.dumps(DEFAULT_STYLE_PRESETS, ensure_ascii=False))
+        .replace("__MATERIAL_SPEC_DEFAULTS__", json.dumps(MATERIAL_SPEC_DEFAULTS, ensure_ascii=False))
+        .replace("__MATERIAL_SURFACE_PRESETS__", json.dumps(MATERIAL_SURFACE_PRESETS, ensure_ascii=False))
         .replace("__PREVIEW_ENVIRONMENTS__", json.dumps(PREVIEW_ENVIRONMENTS, ensure_ascii=False))
     )
 

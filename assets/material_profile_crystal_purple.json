@@ -2,6 +2,7 @@
   "preset": "crystal-purple",
   "materials": {
     "ground": {
+      "finish": "custom",
       "baseColor": "#eef0f8",
       "opacity": 1.0,
       "roughness": 0.88,
@@ -10,10 +11,16 @@
       "specular": 0.42,
       "transmission": 0.0,
       "ior": 1.45,
+      "clearcoat": 0.08,
+      "clearcoatRoughness": 0.26,
+      "sheen": 0.03,
+      "sheenColor": "#ffffff",
+      "sheenRoughness": 0.92,
       "doubleSided": true,
       "alphaMode": "OPAQUE"
     },
     "wall": {
+      "finish": "custom",
       "baseColor": "#9d8bff",
       "opacity": 1.0,
       "roughness": 0.38,
@@ -22,10 +29,16 @@
       "specular": 0.38,
       "transmission": 0.0,
       "ior": 1.45,
+      "clearcoat": 0.1,
+      "clearcoatRoughness": 0.2,
+      "sheen": 0.08,
+      "sheenColor": "#f5f2ff",
+      "sheenRoughness": 0.82,
       "doubleSided": true,
       "alphaMode": "OPAQUE"
     },
     "door": {
+      "finish": "custom",
       "baseColor": "#4f3ac6",
       "opacity": 0.78,
       "roughness": 0.18,
@@ -34,6 +47,11 @@
       "specular": 0.62,
       "transmission": 0.2,
       "ior": 1.45,
+      "clearcoat": 0.16,
+      "clearcoatRoughness": 0.24,
+      "sheen": 0.06,
+      "sheenColor": "#dad0ff",
+      "sheenRoughness": 0.78,
       "doubleSided": true,
       "alphaMode": "BLEND"
     }
