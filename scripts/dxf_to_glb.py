@@ -34,6 +34,7 @@ DEFAULT_GEOMETRY = {
     "door_mode": "none",
     "center_mode": "grounded-xz",
     "unit_scale": 0.001,
+    "uniform_scale": 1.0,
     "wall_height_m": 3.8,
     "door_height_m": 2.4,
     "wall_thickness_mm": 120.0,
@@ -62,15 +63,15 @@ DEFAULT_STYLE_PRESETS: dict[str, dict[str, Any]] = {
             },
             "wall": {
                 "baseColor": "#9d8bff",
-                "opacity": 0.34,
-                "roughness": 0.06,
-                "metallic": 0.0,
+                "opacity": 1.0,
+                "roughness": 0.38,
+                "metallic": 0.02,
                 "emissive": "#120a36",
-                "specular": 0.84,
-                "transmission": 0.88,
-                "ior": 1.48,
+                "specular": 0.38,
+                "transmission": 0.0,
+                "ior": 1.45,
                 "doubleSided": True,
-                "alphaMode": "BLEND",
+                "alphaMode": "OPAQUE",
             },
             "door": {
                 "baseColor": "#4f3ac6",
@@ -102,15 +103,15 @@ DEFAULT_STYLE_PRESETS: dict[str, dict[str, Any]] = {
             },
             "wall": {
                 "baseColor": "#a798ff",
-                "opacity": 0.45,
-                "roughness": 0.35,
+                "opacity": 1.0,
+                "roughness": 0.58,
                 "metallic": 0.0,
                 "emissive": "#0d0824",
-                "specular": 0.35,
-                "transmission": 0.42,
+                "specular": 0.28,
+                "transmission": 0.0,
                 "ior": 1.45,
                 "doubleSided": True,
-                "alphaMode": "BLEND",
+                "alphaMode": "OPAQUE",
             },
             "door": {
                 "baseColor": "#5d4cc5",
@@ -142,15 +143,15 @@ DEFAULT_STYLE_PRESETS: dict[str, dict[str, Any]] = {
             },
             "wall": {
                 "baseColor": "#8972ff",
-                "opacity": 0.42,
-                "roughness": 0.03,
-                "metallic": 0.35,
+                "opacity": 0.98,
+                "roughness": 0.24,
+                "metallic": 0.25,
                 "emissive": "#0f0933",
-                "specular": 1.0,
-                "transmission": 0.65,
-                "ior": 1.5,
+                "specular": 0.6,
+                "transmission": 0.0,
+                "ior": 1.45,
                 "doubleSided": True,
-                "alphaMode": "BLEND",
+                "alphaMode": "OPAQUE",
             },
             "door": {
                 "baseColor": "#4a35a3",
@@ -770,6 +771,44 @@ def extract_indexed_mesh(
     return packed_positions, packed_indices
 
 
+def compute_vertex_normals(
+    positions: list[tuple[float, float, float]],
+    indices: list[int],
+) -> list[tuple[float, float, float]]:
+    normals = [[0.0, 0.0, 0.0] for _ in positions]
+
+    def add(a: int, nx: float, ny: float, nz: float) -> None:
+        normals[a][0] += nx
+        normals[a][1] += ny
+        normals[a][2] += nz
+
+    for i in range(0, len(indices), 3):
+        ia, ib, ic = indices[i], indices[i + 1], indices[i + 2]
+        ax, ay, az = positions[ia]
+        bx, by, bz = positions[ib]
+        cx, cy, cz = positions[ic]
+
+        ux, uy, uz = bx - ax, by - ay, bz - az
+        vx, vy, vz = cx - ax, cy - ay, cz - az
+        nx = (uy * vz) - (uz * vy)
+        ny = (uz * vx) - (ux * vz)
+        nz = (ux * vy) - (uy * vx)
+
+        add(ia, nx, ny, nz)
+        add(ib, nx, ny, nz)
+        add(ic, nx, ny, nz)
+
+    result: list[tuple[float, float, float]] = []
+    for nx, ny, nz in normals:
+        length = math.sqrt((nx * nx) + (ny * ny) + (nz * nz))
+        if length <= 1e-12:
+            result.append((0.0, 1.0, 0.0))
+            continue
+        inv = 1.0 / length
+        result.append((nx * inv, ny * inv, nz * inv))
+    return result
+
+
 def bounds_of_positions(positions: list[tuple[float, float, float]]) -> tuple[list[float], list[float]]:
     xs = [p[0] for p in positions]
     ys = [p[1] for p in positions]
@@ -897,9 +936,12 @@ def build_gltf(
         positions, indices = extract_indexed_mesh(vertices, faces)
         if not positions or not indices:
             continue
+        normals = compute_vertex_normals(positions, indices)
 
         flat_positions = [coord for pos in positions for coord in pos]
         pos_bytes = struct.pack(f"<{len(flat_positions)}f", *flat_positions)
+        flat_normals = [coord for n in normals for coord in n]
+        normal_bytes = struct.pack(f"<{len(flat_normals)}f", *flat_normals)
 
         idx_array = array.array("I", indices)
         if os.sys.byteorder != "little":
@@ -907,6 +949,7 @@ def build_gltf(
         idx_bytes = idx_array.tobytes()
 
         pos_view = append_buffer_view(pos_bytes, target=34962)
+        normal_view = append_buffer_view(normal_bytes, target=34962)
         idx_view = append_buffer_view(idx_bytes, target=34963)
 
         mins, maxs = bounds_of_positions(positions)
@@ -917,6 +960,14 @@ def build_gltf(
             gltf_type="VEC3",
             mins=mins,
             maxs=maxs,
+        )
+        normal_accessor = append_accessor(
+            view_index=normal_view,
+            component_type=5126,
+            count=len(normals),
+            gltf_type="VEC3",
+            mins=[-1.0, -1.0, -1.0],
+            maxs=[1.0, 1.0, 1.0],
         )
         idx_accessor = append_accessor(
             view_index=idx_view,
@@ -929,7 +980,7 @@ def build_gltf(
 
         primitives.append(
             {
-                "attributes": {"POSITION": pos_accessor},
+                "attributes": {"POSITION": pos_accessor, "NORMAL": normal_accessor},
                 "indices": idx_accessor,
                 "material": material_index[semantic],
             }
@@ -1057,6 +1108,12 @@ def build_scene(
         vertices_yup,
         center_mode=str(geometry["center_mode"]),
     )
+    uniform_scale = float(geometry.get("uniform_scale", 1.0))
+    if abs(uniform_scale - 1.0) > 1e-12:
+        centered_vertices = [
+            (x * uniform_scale, y * uniform_scale, z * uniform_scale) for x, y, z in centered_vertices
+        ]
+        bbox_after = compute_bbox(centered_vertices)
 
     write_glb(output_glb, centered_vertices, faces_by_semantic, profile)
 
@@ -1066,6 +1123,7 @@ def build_scene(
         "transform_policy": {
             "up_axis": "y",
             "center_mode": geometry["center_mode"],
+            "uniform_scale": uniform_scale,
             "offset": {k: round(v, 6) for k, v in offset.items()},
         },
         "params": geometry,
@@ -1262,6 +1320,7 @@ const currentProfile = normalizeLocalProfile(state.profile || {}, (state.profile
 const geometryDefaults = state.geometry || {};
 const geometryState = {
   door_mode: geometryDefaults.door_mode === 'block' ? 'block' : 'none',
+  uniform_scale: toNumber(geometryDefaults.uniform_scale, 1.0),
   wall_height_m: toNumber(geometryDefaults.wall_height_m, 3.8),
   door_height_m: toNumber(geometryDefaults.door_height_m, 2.4),
   wall_thickness_mm: toNumber(geometryDefaults.wall_thickness_mm, 120),
@@ -1337,6 +1396,8 @@ const viewerState = {
   wireframe: false,
   grid: true,
   axes: false,
+  focusMode: 'off',
+  focusDimOpacity: 0.14,
   environment: 'Neutral',
   toneMapping: 'ACES Filmic',
   exposure: 0.0,
@@ -1406,6 +1467,20 @@ function applyProfileValues(profileLike, forcedPreset) {
   refreshMaterialControllers();
 }
 
+function remapWallsForClarity() {
+  const wall = currentProfile.materials.wall || {};
+  wall.opacity = 1.0;
+  wall.alphaMode = 'OPAQUE';
+  wall.transmission = 0.0;
+  wall.roughness = Math.max(toNumber(wall.roughness, 0.35), 0.35);
+  wall.metallic = Math.min(toNumber(wall.metallic, 0.02), 0.12);
+  wall.specular = Math.min(toNumber(wall.specular, 0.38), 0.45);
+  wall.ior = 1.45;
+  currentProfile.materials.wall = wall;
+  refreshMaterialControllers();
+  applyProfileToLoadedModel();
+}
+
 function resize() {
   const width = canvasHost.clientWidth;
   const height = Math.max(canvasHost.clientHeight, 1);
@@ -1460,6 +1535,32 @@ function applyProfileToLoadedModel() {
   updateDisplayState();
 }
 
+function applyFocusMode() {
+  if (!modelRoot) return;
+  const mode = viewerState.focusMode || 'off';
+  const dimOpacity = Math.min(Math.max(toNumber(viewerState.focusDimOpacity, 0.14), 0.01), 0.95);
+  const enabled = mode !== 'off';
+
+  traverseModelMaterials((material) => {
+    const group = materialFromName(material.name);
+    if (!group || !currentProfile.materials[group]) return;
+    const spec = currentProfile.materials[group];
+    const baseOpacity = toNumber(spec.opacity, 1.0);
+    const baseAlphaMode = String(spec.alphaMode || 'OPAQUE').toUpperCase();
+
+    if (!enabled || group === mode) {
+      material.opacity = baseOpacity;
+      material.transparent = baseOpacity < 0.999 || baseAlphaMode === 'BLEND';
+      material.depthWrite = !material.transparent;
+    } else {
+      material.opacity = dimOpacity;
+      material.transparent = true;
+      material.depthWrite = false;
+    }
+    material.needsUpdate = true;
+  });
+}
+
 function updateDisplayState() {
   gridHelper.visible = viewerState.grid;
   axesHelper.visible = viewerState.axes;
@@ -1468,6 +1569,7 @@ function updateDisplayState() {
     material.wireframe = viewerState.wireframe;
     material.needsUpdate = true;
   });
+  applyFocusMode();
 }
 
 function updateLightingState() {
@@ -1680,6 +1782,7 @@ async function loadModel(url) {
 function getGeometryPayload() {
   return {
     door_mode: geometryState.door_mode === 'block' ? 'block' : 'none',
+    uniform_scale: toNumber(geometryState.uniform_scale, 1.0),
     wall_height_m: toNumber(geometryState.wall_height_m, 3.8),
     door_height_m: toNumber(geometryState.door_height_m, 2.4),
     wall_thickness_mm: toNumber(geometryState.wall_thickness_mm, 120),
@@ -1712,7 +1815,7 @@ function downloadJson(filename, data) {
 
 function copyCliArgs() {
   const g = getGeometryPayload();
-  const text = `--door-mode ${g.door_mode} --wall-height-m ${g.wall_height_m} --door-height-m ${g.door_height_m} --wall-thickness-mm ${g.wall_thickness_mm} --column-thickness-mm ${g.column_thickness_mm} --ground-thickness-m ${g.ground_thickness_m} --ground-margin-m ${g.ground_margin_m}`;
+  const text = `--door-mode ${g.door_mode} --uniform-scale ${g.uniform_scale} --wall-height-m ${g.wall_height_m} --door-height-m ${g.door_height_m} --wall-thickness-mm ${g.wall_thickness_mm} --column-thickness-mm ${g.column_thickness_mm} --ground-thickness-m ${g.ground_thickness_m} --ground-margin-m ${g.ground_margin_m}`;
   navigator.clipboard.writeText(text).then(() => setStatus('CLI args copied')).catch(() => setStatus('Copy failed'));
 }
 
@@ -1757,6 +1860,10 @@ const workbenchActions = {
   },
   rebuildGeometry: () => rebuild(false),
   rebuildWriteProfile: () => rebuild(true),
+  remapSolidWalls: () => {
+    remapWallsForClarity();
+    setStatus('Wall material remapped to solid profile');
+  },
   copyCliArgs: () => copyCliArgs(),
   exportProfile: () => {
     downloadJson('material_profile.json', currentProfile);
@@ -1766,6 +1873,7 @@ const workbenchActions = {
 };
 
 wbGeometryFolder.add(geometryState, 'door_mode', ['none', 'block']).name('door mode');
+wbGeometryFolder.add(geometryState, 'uniform_scale', 0.1, 5.0, 0.01).name('uniform-scale');
 wbGeometryFolder.add(geometryState, 'wall_height_m', 0.1, 300, 0.1).name('wall-height-m');
 wbGeometryFolder.add(geometryState, 'door_height_m', 0.1, 300, 0.1).name('door-height-m');
 wbGeometryFolder.add(geometryState, 'wall_thickness_mm', 1, 10000, 1).name('wall-thickness-mm');
@@ -1798,6 +1906,7 @@ MATERIAL_GROUPS.forEach((group) => {
 wbActionsFolder.add(workbenchActions, 'applyMaterials').name('Apply Materials');
 wbActionsFolder.add(workbenchActions, 'rebuildGeometry').name('Rebuild Geometry');
 wbActionsFolder.add(workbenchActions, 'rebuildWriteProfile').name('Rebuild + Write Profile');
+wbActionsFolder.add(workbenchActions, 'remapSolidWalls').name('Remap Solid Walls');
 wbActionsFolder.add(workbenchActions, 'copyCliArgs').name('Copy CLI Args');
 wbActionsFolder.add(workbenchActions, 'exportProfile').name('Export Profile');
 wbActionsFolder.add(workbenchActions, 'importProfile').name('Import Profile');
@@ -1807,6 +1916,8 @@ displayFolder.add(viewerState, 'autoRotate').onChange(() => { controls.autoRotat
 displayFolder.add(viewerState, 'wireframe').onChange(() => updateDisplayState());
 displayFolder.add(viewerState, 'grid').onChange(() => updateDisplayState());
 displayFolder.add(viewerState, 'axes').onChange(() => updateDisplayState());
+displayFolder.add(viewerState, 'focusMode', ['off', 'wall', 'door', 'ground']).onChange(() => updateDisplayState());
+displayFolder.add(viewerState, 'focusDimOpacity', 0.02, 0.85, 0.01).name('focusDim').onChange(() => updateDisplayState());
 
 environmentController = lightingFolder
   .add(viewerState, 'environment', environmentPresets.map((entry) => entry.name))
@@ -1897,6 +2008,7 @@ def normalize_geometry(payload: dict[str, Any] | None, base: dict[str, Any] | No
         "door_mode": door_mode,
         "center_mode": center_mode,
         "unit_scale": clamp(float(src.get("unit_scale", DEFAULT_GEOMETRY["unit_scale"])), 1e-6, 1000.0),
+        "uniform_scale": clamp(float(src.get("uniform_scale", DEFAULT_GEOMETRY["uniform_scale"])), 0.001, 1000.0),
         "wall_height_m": clamp(float(src.get("wall_height_m", DEFAULT_GEOMETRY["wall_height_m"])), 0.1, 300.0),
         "door_height_m": clamp(float(src.get("door_height_m", DEFAULT_GEOMETRY["door_height_m"])), 0.1, 300.0),
         "wall_thickness_mm": clamp(float(src.get("wall_thickness_mm", DEFAULT_GEOMETRY["wall_thickness_mm"])), 1.0, 10000.0),
@@ -2097,6 +2209,7 @@ def build_parser() -> argparse.ArgumentParser:
             default=DEFAULT_GEOMETRY["center_mode"],
         )
         target.add_argument("--unit-scale", type=float, default=DEFAULT_GEOMETRY["unit_scale"])
+        target.add_argument("--uniform-scale", type=float, default=DEFAULT_GEOMETRY["uniform_scale"])
         target.add_argument("--wall-height-m", type=float, default=DEFAULT_GEOMETRY["wall_height_m"])
         target.add_argument("--door-height-m", type=float, default=DEFAULT_GEOMETRY["door_height_m"])
         target.add_argument("--wall-thickness-mm", type=float, default=DEFAULT_GEOMETRY["wall_thickness_mm"])
@@ -2131,6 +2244,7 @@ def args_to_geometry(args: argparse.Namespace) -> dict[str, Any]:
         "door_mode": args.door_mode,
         "center_mode": args.center_mode,
         "unit_scale": args.unit_scale,
+        "uniform_scale": args.uniform_scale,
         "wall_height_m": args.wall_height_m,
         "door_height_m": args.door_height_m,
         "wall_thickness_mm": args.wall_thickness_mm,
