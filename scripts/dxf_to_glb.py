@@ -574,6 +574,8 @@ class Footprint:
     y1: float
     semantic: str
     source: str
+    segment: tuple[float, float, float, float] | None = None
+    thickness: float | None = None
 
     @property
     def area(self) -> float:
@@ -741,6 +743,27 @@ def segment_bbox(x1: float, y1: float, x2: float, y2: float, thickness: float) -
     return xa, ya, xb, yb
 
 
+def oriented_segment_bbox(x1: float, y1: float, x2: float, y2: float, thickness: float) -> tuple[float, float, float, float]:
+    dx = x2 - x1
+    dy = y2 - y1
+    length = math.hypot(dx, dy)
+    if length <= 1e-9:
+        return x1, y1, x1, y1
+
+    half = thickness / 2.0
+    nx = -dy / length * half
+    ny = dx / length * half
+    corners = [
+        (x1 + nx, y1 + ny),
+        (x1 - nx, y1 - ny),
+        (x2 + nx, y2 + ny),
+        (x2 - nx, y2 - ny),
+    ]
+    xs = [p[0] for p in corners]
+    ys = [p[1] for p in corners]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
 def append_line_footprint(
     footprints: list[Footprint],
     x1: float,
@@ -753,10 +776,27 @@ def append_line_footprint(
 ) -> None:
     if abs(x1 - x2) < 1e-6 and abs(y1 - y2) < 1e-6:
         return
-    xa, ya, xb, yb = segment_bbox(x1, y1, x2, y2, thickness)
+    is_axis_aligned = abs(y1 - y2) < 1e-6 or abs(x1 - x2) < 1e-6
+    if is_axis_aligned:
+        xa, ya, xb, yb = segment_bbox(x1, y1, x2, y2, thickness)
+    else:
+        xa, ya, xb, yb = oriented_segment_bbox(x1, y1, x2, y2, thickness)
     if xb - xa <= 1e-6 or yb - ya <= 1e-6:
         return
-    footprints.append(Footprint(xa, ya, xb, yb, semantic=semantic, source=source))
+    segment = None if is_axis_aligned else (x1, y1, x2, y2)
+    segment_thickness = None if is_axis_aligned else thickness
+    footprints.append(
+        Footprint(
+            xa,
+            ya,
+            xb,
+            yb,
+            semantic=semantic,
+            source=source,
+            segment=segment,
+            thickness=segment_thickness,
+        )
+    )
 
 
 def block_local_bbox(doc: ezdxf.document.Drawing, block_name: str) -> tuple[float, float, float, float] | None:
@@ -931,6 +971,63 @@ def add_box(
             (x1, y0, z1),
             (x1, y1, z1),
             (x0, y1, z1),
+        ]
+    )
+
+    idx = [base + i for i in range(8)]
+    faces.extend(
+        [
+            (idx[0], idx[2], idx[1]),
+            (idx[0], idx[3], idx[2]),
+            (idx[4], idx[5], idx[6]),
+            (idx[4], idx[6], idx[7]),
+            (idx[0], idx[1], idx[5]),
+            (idx[0], idx[5], idx[4]),
+            (idx[1], idx[2], idx[6]),
+            (idx[1], idx[6], idx[5]),
+            (idx[2], idx[3], idx[7]),
+            (idx[2], idx[7], idx[6]),
+            (idx[3], idx[0], idx[4]),
+            (idx[3], idx[4], idx[7]),
+        ]
+    )
+
+
+def add_oriented_segment_prism(
+    vertices: list[tuple[float, float, float]],
+    faces: list[tuple[int, int, int]],
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
+    thickness: float,
+    z0: float,
+    z1: float,
+) -> None:
+    if thickness <= 0.0 or z1 <= z0:
+        return
+
+    dx = x2 - x1
+    dy = y2 - y1
+    length = math.hypot(dx, dy)
+    if length <= 1e-9:
+        return
+
+    half = thickness / 2.0
+    nx = -dy / length * half
+    ny = dx / length * half
+
+    base = len(vertices) + 1
+    vertices.extend(
+        [
+            (x1 + nx, y1 + ny, z0),
+            (x1 - nx, y1 - ny, z0),
+            (x2 - nx, y2 - ny, z0),
+            (x2 + nx, y2 + ny, z0),
+            (x1 + nx, y1 + ny, z1),
+            (x1 - nx, y1 - ny, z1),
+            (x2 - nx, y2 - ny, z1),
+            (x2 + nx, y2 + ny, z1),
         ]
     )
 
@@ -1319,6 +1416,14 @@ def build_scene(
     # Scale 2D footprints from CAD units to world units.
     scaled: list[Footprint] = []
     for fp in footprints:
+        segment = None
+        if fp.segment is not None:
+            segment = (
+                fp.segment[0] * unit_scale,
+                fp.segment[1] * unit_scale,
+                fp.segment[2] * unit_scale,
+                fp.segment[3] * unit_scale,
+            )
         scaled.append(
             Footprint(
                 x0=fp.x0 * unit_scale,
@@ -1327,6 +1432,8 @@ def build_scene(
                 y1=fp.y1 * unit_scale,
                 semantic=fp.semantic,
                 source=fp.source,
+                segment=segment,
+                thickness=fp.thickness * unit_scale if fp.thickness is not None else None,
             )
         )
 
@@ -1356,16 +1463,29 @@ def build_scene(
     for fp in scaled:
         faces: list[tuple[int, int, int]] = []
         height = wall_height if fp.semantic == "wall" else door_height
-        add_box(
-            vertices,
-            faces,
-            fp.x0,
-            fp.y0,
-            fp.x1,
-            fp.y1,
-            ground_thickness,
-            ground_thickness + height,
-        )
+        if fp.segment is not None and fp.thickness is not None:
+            add_oriented_segment_prism(
+                vertices,
+                faces,
+                fp.segment[0],
+                fp.segment[1],
+                fp.segment[2],
+                fp.segment[3],
+                fp.thickness,
+                ground_thickness,
+                ground_thickness + height,
+            )
+        else:
+            add_box(
+                vertices,
+                faces,
+                fp.x0,
+                fp.y0,
+                fp.x1,
+                fp.y1,
+                ground_thickness,
+                ground_thickness + height,
+            )
         faces_by_semantic[fp.semantic].extend(faces)
 
     # Convert to y-up and then apply center/ground policy.
