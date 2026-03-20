@@ -36,10 +36,19 @@ python3 scripts/dxf_to_glb.py build \
   --preview-html /tmp/floorplan_preview.html
 ```
 
+Mode C: CLI built-in mode picker (`interactive`)
+
+```bash
+python3 scripts/dxf_to_glb.py interactive
+```
+
+The CLI shows an internal mode selector (`1=serve`, `2=build`) and guides required paths.
+
 ## Interaction Contract
 
 - Required: explicitly confirm mode with the user before running commands when the request is ambiguous.
 - Suggested confirmation wording: "Do you want preview mode (`serve`) or direct export (`build`)?"
+- CLI option: use built-in mode selector via `python3 scripts/dxf_to_glb.py interactive`.
 - If user selects `serve`: start local workbench, return URL, and wait for user to finish tuning before final delivery.
 - If user selects `build`: run one-shot export and return output paths directly.
 - After final model delivery from `serve`: stop the Python preview process and clean runtime leftovers (`server.pid`, stale temp runtime files/logs) while keeping final deliverables.

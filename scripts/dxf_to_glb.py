@@ -4,6 +4,7 @@
 Modes:
 - build: one-shot conversion to GLB/JSON/HTML
 - serve: local workbench with rebuild and material/profile APIs
+- interactive: CLI mode selector and guided run (serve/build)
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ import math
 import os
 import re
 import struct
+import sys
 import threading
 import time
 from dataclasses import dataclass
@@ -2665,6 +2667,20 @@ def build_parser() -> argparse.ArgumentParser:
     serve_cmd.add_argument("--preset", choices=sorted(DEFAULT_STYLE_PRESETS.keys()), default=DEFAULT_PRESET)
     add_geometry_args(serve_cmd)
 
+    interactive_cmd = subparsers.add_parser("interactive", help="Interactive CLI mode picker (serve/build)")
+    interactive_cmd.add_argument("--run-mode", choices=["serve", "build"], help="Optional pre-selected mode")
+    interactive_cmd.add_argument("--input", type=Path, help="Input DXF file")
+    interactive_cmd.add_argument("--output", type=Path, help="Output GLB path (build mode)")
+    interactive_cmd.add_argument("--emit-json", type=Path, help="Optional metadata JSON output (build mode)")
+    interactive_cmd.add_argument("--preview-html", type=Path, help="Optional preview HTML output (build mode)")
+    interactive_cmd.add_argument("--material-profile", type=Path, help="Material profile JSON path (build mode)")
+    interactive_cmd.add_argument("--out-dir", type=Path, help="Output workspace directory (serve mode)")
+    interactive_cmd.add_argument("--host", default="127.0.0.1")
+    interactive_cmd.add_argument("--port", type=int, default=8124)
+    interactive_cmd.add_argument("--default-profile", type=Path, help="Default profile for workbench (serve mode)")
+    interactive_cmd.add_argument("--preset", choices=sorted(DEFAULT_STYLE_PRESETS.keys()), default=DEFAULT_PRESET)
+    add_geometry_args(interactive_cmd)
+
     return parser
 
 
@@ -2683,6 +2699,165 @@ def args_to_geometry(args: argparse.Namespace) -> dict[str, Any]:
         "window_pad_mm": args.window_pad_mm,
     }
     return normalize_geometry(raw)
+
+
+def can_prompt() -> bool:
+    return sys.stdin.isatty() and sys.stdout.isatty()
+
+
+def prompt_mode_choice(default_mode: str = "serve") -> str:
+    mapping = {
+        "1": "serve",
+        "serve": "serve",
+        "s": "serve",
+        "2": "build",
+        "build": "build",
+        "b": "build",
+    }
+    prompt = (
+        "\nSelect execution mode:\n"
+        "  1) serve - Start workbench preview and tune parameters\n"
+        "  2) build - One-shot export GLB/JSON/HTML\n"
+        f"Choice [1]: "
+    )
+    while True:
+        raw = input(prompt).strip().lower()
+        if not raw:
+            return default_mode
+        selected = mapping.get(raw)
+        if selected:
+            return selected
+        print("[WARN] Invalid choice, please enter 1 or 2.")
+
+
+def prompt_path(question: str, default: Path | None = None, allow_empty: bool = False) -> Path | None:
+    suffix = f" [{default}]" if default is not None else ""
+    while True:
+        raw = input(f"{question}{suffix}: ").strip()
+        if not raw:
+            if default is not None:
+                return default
+            if allow_empty:
+                return None
+            print("[WARN] Value required.")
+            continue
+        if allow_empty and raw in {"-", "none", "skip"}:
+            return None
+        return Path(raw).expanduser()
+
+
+def prompt_existing_input_path(initial: Path | None = None) -> Path:
+    current = initial
+    while True:
+        if current is not None and current.exists():
+            return current
+        if current is not None and not current.exists():
+            print(f"[WARN] Input file does not exist: {current}")
+        current = prompt_path("Input DXF file path")
+
+
+def run_interactive(args: argparse.Namespace) -> int:
+    mode = args.run_mode
+    if mode is None:
+        if not can_prompt():
+            print("[ERROR] interactive mode requires a TTY when --run-mode is omitted.")
+            return 1
+        mode = prompt_mode_choice()
+
+    if mode not in {"serve", "build"}:
+        print(f"[ERROR] Unsupported mode: {mode}")
+        return 1
+
+    input_path = args.input
+    if input_path is None:
+        if not can_prompt():
+            print("[ERROR] interactive mode requires --input when no TTY is available.")
+            return 1
+        input_path = prompt_existing_input_path(None)
+    elif not input_path.exists():
+        if not can_prompt():
+            print(f"[ERROR] Input file does not exist: {input_path}")
+            return 1
+        input_path = prompt_existing_input_path(input_path)
+
+    if mode == "build":
+        output_path = args.output
+        if output_path is None:
+            if not can_prompt():
+                print("[ERROR] build mode requires --output when no TTY is available.")
+                return 1
+            default_output = (input_path.parent / input_path.stem).with_suffix(".glb")
+            output_path = prompt_path("Output GLB path", default=default_output)
+
+        emit_json = args.emit_json
+        preview_html = args.preview_html
+        if can_prompt():
+            if emit_json is None:
+                emit_json = prompt_path(
+                    "Metadata JSON output (enter '-' to skip)",
+                    default=output_path.with_suffix(".json"),
+                    allow_empty=True,
+                )
+            if preview_html is None:
+                preview_html = prompt_path(
+                    "Preview HTML output (enter '-' to skip)",
+                    default=output_path.with_name(f"{output_path.stem}_preview.html"),
+                    allow_empty=True,
+                )
+
+        build_args = argparse.Namespace(
+            mode="build",
+            input=input_path,
+            output=output_path,
+            emit_json=emit_json,
+            preview_html=preview_html,
+            material_profile=args.material_profile,
+            preset=args.preset,
+            door_mode=args.door_mode,
+            center_mode=args.center_mode,
+            unit_scale=args.unit_scale,
+            uniform_scale=args.uniform_scale,
+            wall_height_m=args.wall_height_m,
+            door_height_m=args.door_height_m,
+            wall_thickness_mm=args.wall_thickness_mm,
+            column_thickness_mm=args.column_thickness_mm,
+            ground_thickness_m=args.ground_thickness_m,
+            ground_margin_m=args.ground_margin_m,
+            window_pad_mm=args.window_pad_mm,
+        )
+        return run_build(build_args)
+
+    out_dir = args.out_dir
+    if out_dir is None:
+        if not can_prompt():
+            print("[ERROR] serve mode requires --out-dir when no TTY is available.")
+            return 1
+        out_dir = prompt_path(
+            "Workbench output directory",
+            default=Path.cwd() / f"{input_path.stem}_workbench",
+        )
+
+    serve_args = argparse.Namespace(
+        mode="serve",
+        input=input_path,
+        out_dir=out_dir,
+        host=args.host,
+        port=args.port,
+        default_profile=args.default_profile,
+        preset=args.preset,
+        door_mode=args.door_mode,
+        center_mode=args.center_mode,
+        unit_scale=args.unit_scale,
+        uniform_scale=args.uniform_scale,
+        wall_height_m=args.wall_height_m,
+        door_height_m=args.door_height_m,
+        wall_thickness_mm=args.wall_thickness_mm,
+        column_thickness_mm=args.column_thickness_mm,
+        ground_thickness_m=args.ground_thickness_m,
+        ground_margin_m=args.ground_margin_m,
+        window_pad_mm=args.window_pad_mm,
+    )
+    return run_serve(serve_args)
 
 
 def run_build(args: argparse.Namespace) -> int:
@@ -2761,6 +2936,8 @@ def main() -> int:
         return run_build(args)
     if args.mode == "serve":
         return run_serve(args)
+    if args.mode == "interactive":
+        return run_interactive(args)
 
     parser.print_help()
     return 1
